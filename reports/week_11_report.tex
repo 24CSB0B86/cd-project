@@ -1,0 +1,404 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage[table]{xcolor}
+\usepackage{fancyhdr}
+\usepackage{tikz}
+\usepackage{tabularx}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{lastpage}
+\usepackage{hyperref}
+
+% Page Setup
+\geometry{top=1in, bottom=1in, left=0.8in, right=0.8in}
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small Project 83: Agentic AI Compiler Assistant}
+\rhead{\small Week 11 Report}
+\cfoot{\thepage\ of \pageref{LastPage}}
+
+% Formatting
+\titleformat{\section}{\Large\bfseries\color{red!70!black}}{\thesection.}{1em}{}[\titlerule]
+\titleformat{\subsection}{\large\bfseries\color{red!50!black}}{\thesubsection}{1em}{}
+
+% Code Listings
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    backgroundcolor=\color{gray!10},
+    keywordstyle=\color{blue},
+    stringstyle=\color{green!50!black},
+    commentstyle=\color{gray},
+    showstringspaces=false,
+    tabsize=4,
+    captionpos=b
+}
+
+% Custom commands
+\newcommand{\statusgood}[1]{\colorbox{green!20}{\textbf{#1}}}
+\newcommand{\statuscritical}[1]{\colorbox{red!20}{\textbf{#1}}}
+\newcommand{\statuswarn}[1]{\colorbox{yellow!20}{\textbf{#1}}}
+
+\begin{document}
+
+\begin{center}
+    {\huge \textbf{Week 11 Progress Report}} \\
+    \vspace{3mm}
+    {\large \textbf{Project 83: Conversational Agentic AI Compiler Assistant}} \\
+    \vspace{2mm}
+    \textit{Security Risk Auditing Agent --- Static Application Security Testing (SAST)} \\
+    \vspace{2mm}
+    \textbf{Reporting Period:} Week 11 | \textbf{Status:} \statusgood{COMPLETED}
+\end{center}
+
+\vspace{5mm}
+
+\section{Executive Summary}
+
+Week 11 delivers the \textbf{Security Risk Auditing Agent}: a multi-layered security analysis system that combines a deterministic Static Application Security Testing (SAST) engine with an optional Gemini-powered deep explanation layer. The agent audits Mini-Python source code for five threat categories — unsafe builtins, dangerous imports, Prompt Injection in comments, Logic Bombs, and infinite recursion heuristics — all without executing the code.
+
+\textbf{Key Achievement:} The compiler pipeline is now complete with a security gatekeeper. Before code is trusted, it is scanned for known threats, categorized by severity (CRITICAL / HIGH / MEDIUM / LOW), and reported with exact line and column numbers. The Gemini AI layer can then provide educational explanations and safe code rewrites. This directly implements the OWASP Top 10 for LLM Applications (specifically: Prompt Injection, Insecure Code Execution, and Logic Bomb patterns).
+
+\subsection{Week Overview}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Planned Objectives:} SAST engine, Gemini security wrapper, tool integration, Streamlit UI, test suite
+    \item \textbf{Achieved:} All objectives completed
+    \item \textbf{Test Coverage:} 52 new deterministic tests; \textbf{264 total tests passing} (Weeks 5--11)
+\end{itemize}
+
+\section{Architecture: Security Auditing Layer}
+
+\subsection{2.1 Motivation}
+
+The compiler pipeline (Weeks 5--10) could compile, analyze semantics, and explain errors; however, it had no defence against \textit{malicious} code. A user could submit:
+\begin{itemize}
+    \item Code containing \texttt{eval(user\_input)} — a Remote Code Execution (RCE) backdoor
+    \item Comments like \texttt{\# IGNORE PREVIOUS INSTRUCTIONS} — a Prompt Injection attack on the AI
+    \item Time-triggered conditionals that delete data on a specific date — a Logic Bomb
+\end{itemize}
+
+Week 11 adds a security layer that intercepts all code before it is analyzed by Gemini.
+
+\subsection{2.2 Updated Pipeline}
+
+\begin{table}[h]
+\centering
+\begin{tabularx}{\textwidth}{|c|l|X|}
+\hline
+\rowcolor{red!10}
+\textbf{Phase} & \textbf{Component} & \textbf{Output} \\
+\hline
+Week 5 & Lexer & Token stream \\
+\hline
+Week 6 & Parser & Abstract Syntax Tree (AST) \\
+\hline
+Week 7 & Semantic Analyzer & Validated AST + Symbol Table + Errors \\
+\hline
+Week 8 & Context Provider & Natural Language Context for Gemini \\
+\hline
+Week 9 & Compiler Toolbox + AgenticGeminiClient & ReAct tool-use loop \\
+\hline
+Week 10 & ChatSession + ConversationalDebugger & Multi-turn conversation state \\
+\hline
+\textbf{Week 11} & \textbf{SecurityAuditor (SAST)} & \textbf{Threat findings by severity} \\
+\hline
+\textbf{Week 11} & \textbf{SecurityAgent (AI)} & \textbf{Deep explanation + safe rewrite} \\
+\hline
+\end{tabularx}
+\caption{Complete compiler pipeline --- Week 11 additions highlighted}
+\end{table}
+
+\section{Implementation}
+
+\subsection{3.1 Module: \texttt{src/orchestrator/security\_auditor.py}}
+
+The \texttt{SecurityAuditor} class is the pure-Python SAST engine. It requires no API keys and produces deterministic results.
+
+\textbf{Data Structures:}
+\begin{itemize}
+    \item \texttt{SecurityFinding} — dataclass storing: \texttt{severity}, \texttt{category}, \texttt{line}, \texttt{column}, \texttt{message}, \texttt{snippet}
+    \item \texttt{AuditReport} — dataclass with a list of findings and computed properties
+\end{itemize}
+
+\textbf{AuditReport computed properties:}
+
+\begin{table}[h]
+\centering
+\begin{tabularx}{\textwidth}{|l|X|}
+\hline
+\rowcolor{red!10}
+\textbf{Property} & \textbf{Description} \\
+\hline
+\texttt{is\_safe} & True when no CRITICAL or HIGH findings exist \\
+\hline
+\texttt{critical\_count} & Count of CRITICAL severity findings \\
+\hline
+\texttt{high\_count} & Count of HIGH severity findings \\
+\hline
+\texttt{medium\_count} & Count of MEDIUM severity findings \\
+\hline
+\texttt{low\_count / summary} & Count + human-readable status string \\
+\hline
+\texttt{to\_text()} & Full formatted report string (headers, icons, line numbers) \\
+\hline
+\end{tabularx}
+\caption{AuditReport API}
+\end{table}
+
+\subsection{3.2 Threat Detection Categories}
+
+\subsubsection{I. Unsafe Builtins (CRITICAL / HIGH / MEDIUM)}
+
+Scans non-comment lines using regex. The scanner strips inline comments first to avoid false positives from commented-out code.
+
+\begin{table}[h]
+\centering
+\begin{tabularx}{\textwidth}{|l|c|X|}
+\hline
+\rowcolor{red!10}
+\textbf{Pattern} & \textbf{Severity} & \textbf{Reason} \\
+\hline
+\texttt{eval()} & CRITICAL & Executes arbitrary code strings — Remote Code Execution risk \\
+\hline
+\texttt{exec()} & CRITICAL & Executes arbitrary code blocks \\
+\hline
+\texttt{\_\_import\_\_()} & CRITICAL & Bypasses standard import safety mechanisms \\
+\hline
+\texttt{os.system()} & HIGH & Executes raw shell commands \\
+\hline
+\texttt{subprocess.*} & HIGH & Spawns external processes \\
+\hline
+\texttt{compile()} & HIGH & Builds arbitrary bytecode objects \\
+\hline
+\texttt{open()} & MEDIUM & File I/O — may expose sensitive data \\
+\hline
+\texttt{getattr() / setattr()} & LOW & May bypass access controls \\
+\hline
+\end{tabularx}
+\caption{Unsafe builtin detection table}
+\end{table}
+
+\subsubsection{II. Dangerous Imports (CRITICAL / HIGH / MEDIUM)}
+
+Scans for \texttt{import <module>} and \texttt{from <module> import} statements on non-comment lines.
+
+\begin{lstlisting}[language=Python, caption=Dangerous import detection example]
+# Detected as HIGH severity:
+import os         # grants full filesystem / shell access
+import subprocess
+
+# Detected as CRITICAL severity:
+import ctypes     # direct C memory manipulation
+
+# NOT flagged:
+import math       # standard safe library
+\end{lstlisting}
+
+\subsubsection{III. Prompt Injection in Comments (HIGH)}
+
+Attackers can embed adversarial instructions into code comments to manipulate the AI assistant reading the code. The scanner searches all \texttt{\#} comment text for a keyword blacklist:
+
+\begin{center}
+\texttt{ignore previous}, \texttt{system:}, \texttt{jailbreak}, \texttt{forget previous}, \texttt{override}, \texttt{bypass}, \texttt{act as}, \texttt{you are now}, \texttt{dan mode}, \texttt{prompt injection}
+\end{center}
+
+This implements a defence against OWASP LLM01: Prompt Injection.
+
+\subsubsection{IV. Logic Bomb Heuristics (CRITICAL / HIGH)}
+
+Detects conditional triggers associated with time, environment variables, and destructive operations:
+
+\begin{lstlisting}[language=Python, caption=Logic Bomb pattern examples]
+# Flagged: time-based trigger
+if datetime.date() >= '2026-12-31':
+    os.remove('/critical/data')
+
+# Flagged: environment variable trigger
+if os.getenv('TRIGGER') == 'ACTIVATE':
+    wipe_database()
+
+# Flagged: destructive payload
+os.remove('/etc/shadow')
+\end{lstlisting}
+
+\subsubsection{V. Infinite Recursion Heuristic (MEDIUM)}
+
+Detects functions that call themselves without an apparent base-case guard (\texttt{if} or \texttt{return} statement in the function body):
+
+\begin{lstlisting}[language=Python, caption=Infinite recursion detection]
+# Flagged: no if/return guard
+def bomb():
+    bomb()
+
+# NOT flagged: has an if guard
+def factorial(n):
+    if n == 0:
+        return 1
+    return n * factorial(n - 1)
+\end{lstlisting}
+
+\subsection{3.3 Module: \texttt{src/orchestrator/security\_agent.py}}
+
+The \texttt{SecurityAgent} class wraps both the SAST engine and the Gemini API:
+
+\begin{enumerate}
+    \item \textbf{\texttt{audit\_with\_ai(source\_code)}}: Runs SAST first. If findings exist and the Gemini API is configured, sends findings and code to Gemini with a security educator system prompt. Gemini explains each finding using concrete attack scenarios and generates a safe rewrite.
+    \item \textbf{\texttt{generate\_safe\_fix(source\_code, finding\_index)}}: Requests a targeted rewrite for a single specific finding.
+    \item \textbf{\texttt{quick\_audit(source\_code)}}: Static method — SAST-only, no API required.
+\end{enumerate}
+
+The agent degrades gracefully: if \texttt{GEMINI\_API\_KEY} is absent, it returns the SAST report with a helpful note instead of failing.
+
+\subsection{3.4 Tool Integration}
+
+The \texttt{audit\_security()} method was added to \texttt{CompilerToolbox} and registered as Tool \#8 in \texttt{tool\_registry.py}. The Gemini AI agent can now autonomously decide to call this tool during a ReAct investigation loop when it suspects security issues.
+
+\begin{lstlisting}[language=Python, caption=audit\_security() in CompilerToolbox.dispatch()]
+dispatch_map = {
+    "check_scope": ...,
+    "reparse_code": ...,
+    "audit_security": lambda a: self.audit_security(),   # NEW - Week 11
+}
+\end{lstlisting}
+
+\section{Streamlit Web UI}
+
+A new Streamlit application \texttt{app\_week11\_streamlit.py} was created, extending the Week 10 interface with a dedicated \textbf{``\(\shield\) Security Audit''} tab:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Code input panel}: pre-loaded sample programs (5 malicious + 1 clean)
+    \item \textbf{``Run Security Audit'' button}: SAST-only, no API key needed
+    \item \textbf{``AI Deep Analysis'' button}: Full SAST + Gemini explanation (requires API key)
+    \item \textbf{Severity metric cards}: colour-coded CRITICAL / HIGH / MEDIUM / LOW counters
+    \item \textbf{Per-finding cards}: severity badge, category, message, line/column, offending code snippet
+    \item \textbf{Debug Chat tab}: Inherited from Week 10 with a new ``Security Risks'' metric card showing live SAST count
+    \item \textbf{Sidebar}: Security Audit quick button alongside existing compiler tools
+\end{itemize}
+
+\section{Testing \& Validation}
+
+\subsection{5.1 Test Suite Summary}
+
+\begin{table}[h]
+\centering
+\begin{tabularx}{\textwidth}{|l|c|X|}
+\hline
+\rowcolor{red!10}
+\textbf{Test Class} & \textbf{Tests} & \textbf{Focus Area} \\
+\hline
+TestSecurityAuditorUnsafeBuiltins & 9 & eval, exec, \_\_import\_\_, os.system, compile, open; line numbers; comment exclusion \\
+\hline
+TestSecurityAuditorDangerousImports & 6 & import os/subprocess/ctypes/sys; from os import; safe imports not flagged \\
+\hline
+TestSecurityAuditorPromptInjection & 7 & 5 keyword variants; severity is HIGH; normal comments not flagged; message text \\
+\hline
+TestSecurityAuditorLogicBombs & 4 & datetime trigger; env var trigger; severity; normal if-else not flagged \\
+\hline
+TestSecurityAuditorInfiniteRecursion & 3 & no-guard flagged; if-guard not flagged; non-recursive not flagged \\
+\hline
+TestAuditReportCleanCode & 5 & assignment/function/loop/print/empty all safe \\
+\hline
+TestAuditReportMetadata & 8 & is\_safe, summary, to\_text, critical\_count, finding fields, audit\_source() helper \\
+\hline
+TestCompilerToolboxAudit & 5 & clean/unsafe audit\_security(); no-source error; dispatch() routing \\
+\hline
+TestToolRegistryWeek11 & 5 & audit\_security in registry; schema name/description/empty params \\
+\hline
+\textbf{Total (Week 11)} & \textbf{52} & \textbf{All passing, zero API calls} \\
+\hline
+\textbf{Grand Total} & \textbf{264} & \textbf{Weeks 5--11, all passing} \\
+\hline
+\end{tabularx}
+\caption{Week 11 Test Suite}
+\end{table}
+
+\subsection{5.2 Key Design Decision: API-Free Determinism}
+
+All 52 Week 11 tests run without any Gemini API calls. The SAST engine is entirely regex and heuristic-based, making it:
+\begin{itemize}
+    \item 100\% deterministic — same input always produces same output
+    \item Zero-cost to test in CI/CD — no API quota consumed
+    \item Faster than any AI-based approach — microseconds per scan
+\end{itemize}
+
+\section{Deliverables}
+
+\begin{itemize}[leftmargin=*]
+    \item \statusgood{COMPLETE} \texttt{src/orchestrator/security\_auditor.py} --- Pure-Python SAST engine (SecurityAuditor, AuditReport, SecurityFinding)
+    \item \statusgood{COMPLETE} \texttt{src/orchestrator/security\_agent.py} --- Gemini-powered security wrapper
+    \item \statusgood{COMPLETE} \texttt{src/orchestrator/compiler\_tools.py} --- Added \texttt{audit\_security()} as Tool \#8
+    \item \statusgood{COMPLETE} \texttt{src/orchestrator/tool\_registry.py} --- Registered \texttt{audit\_security} schema
+    \item \statusgood{COMPLETE} \texttt{tests/test\_week11\_security.py} --- 52 deterministic tests
+    \item \statusgood{COMPLETE} \texttt{demo\_week11\_security.py} --- CLI demo auditing 6 code samples
+    \item \statusgood{COMPLETE} \texttt{app\_week11\_streamlit.py} --- Streamlit UI with Security Audit tab
+    \item \statusgood{COMPLETE} \texttt{reports/week\_11\_report.tex} --- This report
+\end{itemize}
+
+\section{Challenges \& Solutions}
+
+\subsection{7.1 Avoiding False Positives from Comments}
+
+\textbf{Problem:} A line like \texttt{\# result = eval('x')} should not be flagged because the code is commented out and will never execute.
+
+\textbf{Solution:} The \texttt{\_scan\_unsafe\_builtins()} method skips pure comment lines and strips inline comments (\texttt{re.sub(r"\#.*\$", "", line)}) from all non-comment lines before running pattern matching. This prevents false positives while still catching code that uses \texttt{eval()} in executable positions.
+
+\subsection{7.2 Mini-Python Parser Compatibility in Tests}
+
+\textbf{Problem:} Test cases that used \texttt{CompilerToolbox.from\_source('x = eval("1+1")')} failed because the Mini-Python parser does not support string literals containing double-quotes within a function call argument.
+
+\textbf{Solution:} Tests that need to exercise the SAST engine via the toolbox use syntactically simpler code like \texttt{eval(1)} or \texttt{x = eval(1)}, which parses cleanly and still triggers the SAST regex patterns.
+
+\subsection{7.3 Logic Bomb Regex for Function Calls}
+
+\textbf{Problem:} The initial regex \texttt{(datetime|date|time)[\textless\textgreater=!]+\textbackslash s*[\textquotesingle ``\textbackslash d]} did not match patterns like \texttt{datetime.date() >= '2026'} because the method call parentheses \texttt{()} were not accounted for.
+
+\textbf{Solution:} Updated the regex to \texttt{(datetime|date|time|now)\textbackslash s*(\textbackslash (?\textbackslash )?\textbackslash s*[\textless\textgreater=!]=?\textbackslash s*[\textquotesingle ``\textbackslash d]} which allows for optional method call parentheses and comparison operators.
+
+\section{Security Analysis: Threat Coverage}
+
+\begin{table}[h]
+\centering
+\begin{tabularx}{\textwidth}{|l|c|X|}
+\hline
+\rowcolor{red!10}
+\textbf{Threat} & \textbf{OWASP LLM Category} & \textbf{Detection Method} \\
+\hline
+eval() / exec() & LLM02: Insecure Output Handling & Regex — \texttt{\textbackslash beval\textbackslash s*\textbackslash (} \\
+\hline
+Prompt Injection in comments & LLM01: Prompt Injection & Keyword blacklist in \texttt{\#} comments \\
+\hline
+Logic Bombs & LLM06: Sensitive Info Disclosure & Conditional + date/destructive pattern \\
+\hline
+Dangerous imports (os, ctypes) & LLM03: Training Data Poisoning & Module name whitelist violation \\
+\hline
+Infinite recursion & System Availability & Function self-call without guard \\
+\hline
+\end{tabularx}
+\caption{Threat coverage mapped to OWASP LLM Top 10}
+\end{table}
+
+\section{Next Week Preview}
+
+\textbf{Week 12: Performance Benchmarking}
+
+\begin{itemize}[leftmargin=*]
+    \item Measure AI response latency using Python \texttt{timeit}
+    \item Compare accuracy of Gemini's suggested fixes vs.\ traditional Python \texttt{SyntaxError} messages
+    \item Automate benchmarks with PyTest fixtures
+\end{itemize}
+
+\section{Conclusion}
+
+Week 11 successfully implemented the \textbf{Security Risk Auditing Agent}, adding the final defensive layer to the Project 83 compiler pipeline. The SAST engine detects real-world security threats (eval/exec RCE, Prompt Injection, Logic Bombs) without executing any code or calling any API. The Gemini integration provides educational security explanations while the Streamlit UI makes the security scanning capabilities accessible to non-expert users. All 264 tests across Weeks 5--11 pass, with zero API calls required for testing.
+
+\vspace{5mm}
+\noindent\textbf{Prepared by:} Project Team \\
+\textbf{Reporting Date:} Week 11 Completion (24 March 2026) \\
+\textbf{Next Review:} Week 12 -- Performance Benchmarking
+
+\end{document}

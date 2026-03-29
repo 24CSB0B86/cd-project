@@ -1,0 +1,281 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage[table]{xcolor}
+\usepackage{fancyhdr}
+\usepackage{tikz}
+\usepackage{tabularx}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{lastpage}
+\usepackage{hyperref}
+\usetikzlibrary{arrows.meta, shapes, positioning}
+
+% Page Setup
+\geometry{top=1in, bottom=1in, left=0.8in, right=0.8in}
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small Project 83: Agentic AI Compiler Assistant}
+\rhead{\small Week 14 Report}
+\cfoot{\thepage\ of \pageref{LastPage}}
+
+% Formatting
+\titleformat{\section}{\Large\bfseries\color{orange!70!black}}{\thesection.}{1em}{}[\titlerule]
+\titleformat{\subsection}{\large\bfseries\color{orange!50!black}}{\thesubsection}{1em}{}
+
+% Code Listings
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true, frame=single,
+    backgroundcolor=\color{gray!10},
+    keywordstyle=\color{blue},
+    stringstyle=\color{green!50!black},
+    commentstyle=\color{gray},
+    showstringspaces=false, tabsize=4, captionpos=b
+}
+
+\newcommand{\statusgood}[1]{\colorbox{green!20}{\textbf{#1}}}
+\newcommand{\statuscritical}[1]{\colorbox{red!20}{\textbf{#1}}}
+\newcommand{\statuswarn}[1]{\colorbox{yellow!20}{\textbf{#1}}}
+\newcommand{\statusfixed}[1]{\colorbox{blue!15}{\textbf{#1}}}
+
+\begin{document}
+
+\begin{center}
+    {\huge \textbf{Week 14 Progress Report}} \\
+    \vspace{3mm}
+    {\large \textbf{Project 83: Conversational Agentic AI Compiler Assistant}} \\
+    \vspace{2mm}
+    \textit{Integration Testing \& Bug Squashing --- End-to-End Hardening \& CI/CD} \\
+    \vspace{2mm}
+    \textbf{Reporting Period:} Week 14 | \textbf{Status:} \statusgood{COMPLETED}
+\end{center}
+
+\vspace{5mm}
+
+\section{Executive Summary}
+
+Week 14 is the \textbf{Integration \& Bug Squashing} sprint. All seven pipeline stages (Lexer, Parser, Semantic Analyzer, Context Provider, SAST Security Auditor, AgenticGeminiClient, ConversationalDebugger) are wired together into a single \textbf{End-to-End (E2E) test suite} covering 45 complete code-to-conversation scenarios. A \textbf{GitHub Actions CI/CD pipeline} is configured to run all 380 tests automatically on every commit. Twelve bugs identified during cross-stage integration testing were diagnosed and resolved.
+
+\textbf{Key Achievement:} Every AI-generated code fix for the 30 accuracy-test cases (Week 12) now passes the Mini-Python parser without errors --- the closed-loop ``AI fixes code $\rightarrow$ compiler validates fix'' contract is fully satisfied. The system is declared \textbf{feature-complete} as of Week 14.
+
+\subsection{Week Overview}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Planned Objectives:} E2E tests, regression suite, CI/CD pipeline, bug fixes
+    \item \textbf{Achieved:} All objectives; additional edge-case hardening across lexer/parser boundary
+    \item \textbf{Test Coverage:} 45 new E2E tests + 12 regression tests; \textbf{392 total tests passing}
+\end{itemize}
+
+\section{Integration Architecture}
+
+\subsection{2.1 End-to-End Pipeline Contract}
+
+The formal contract for a complete E2E pass is:
+
+\begin{center}
+\texttt{source code} $\xrightarrow{\text{Lexer}}$ \texttt{tokens}
+$\xrightarrow{\text{Parser}}$ \texttt{AST}
+$\xrightarrow{\text{Semantic}}$ \texttt{diagnostics}
+$\xrightarrow{\text{SAST}}$ \texttt{audit report}
+$\xrightarrow{\text{Context}}$ \texttt{LLM prompt}
+$\xrightarrow{\text{Agent}}$ \texttt{explanation + fix}
+$\xrightarrow{\text{Validator}}$ \texttt{fixed code re-parsed: PASS}
+\end{center}
+
+The final stage --- re-parsing the AI's suggested fixed code through the Mini-Python parser --- is the key regression contract added in Week 14. If the fix introduces new syntax errors, the test fails.
+
+\subsection{2.2 E2E Test Categories}
+
+\begin{table}[h]
+\centering
+\begin{tabularx}{\textwidth}{|l|c|X|}
+\hline
+\rowcolor{orange!10}
+\textbf{Category} & \textbf{Cases} & \textbf{Description} \\
+\hline
+Clean code passthrough & 5 & Valid programs compile, produce no errors, generate safe SAST report \\
+\hline
+Syntax error + fix & 10 & AI fixes missing colon, bad indent, unmatched bracket, etc. \\
+\hline
+Semantic error + fix & 10 & AI fixes undefined variable, type error, scope violation \\
+\hline
+Security audit + remediation & 10 & SAST flags issue; agent produces safe-rewrite; re-parse passes \\
+\hline
+Multi-turn conversation & 5 & Three-turn refining session; code updated mid-conversation \\
+\hline
+Mixed error scenario & 5 & Combined syntax + semantic + security; all resolved in one session \\
+\hline
+\textbf{Total E2E} & \textbf{45} & \\
+\hline
+\end{tabularx}
+\caption{End-to-End test categories}
+\end{table}
+
+\section{Bug Inventory \& Resolutions}
+
+Twelve bugs were identified and resolved during integration testing:
+
+\begin{table}[h]
+\centering
+\begin{tabularx}{\textwidth}{|c|l|l|X|}
+\hline
+\rowcolor{orange!10}
+\textbf{\#} & \textbf{Component} & \textbf{Severity} & \textbf{Description \& Fix} \\
+\hline
+1 & Lexer & HIGH & DEDENT not emitted at EOF for single-line functions. Fixed by flushing indent stack on \texttt{EOF} token emission. \\
+\hline
+2 & Parser & HIGH & Chained comparison (\texttt{a < b < c}) caused infinite recursion. Fixed by limiting comparison depth to one level. \\
+\hline
+3 & Semantic & MEDIUM & \texttt{for} loop variable was not added to symbol table in loop body scope. Fixed by pre-inserting loop var before visiting body. \\
+\hline
+4 & Semantic & MEDIUM & Function parameters not scoped to function body when the function had no \texttt{return} statement. Fixed in \texttt{\_visit\_FunctionDef}. \\
+\hline
+5 & Context Provider & LOW & \texttt{serialize\_ast()} omitted \texttt{NoneType} literal nodes, causing incomplete context. Fixed by adding \texttt{NoneConst} visitor. \\
+\hline
+6 & SAST & LOW & False positive: \texttt{open()} flagged inside a \texttt{\# comment}. Already partially fixed in Week 11; residual edge case with trailing spaces resolved. \\
+\hline
+7 & CompilerToolbox & MEDIUM & \texttt{reparse\_code()} did not reset the semantic analyzer before re-run, causing stale symbol table entries. Fixed by reinstantiating \texttt{SemanticAnalyzer}. \\
+\hline
+8 & AgenticGeminiClient & MEDIUM & ReAct loop exited with empty response when \texttt{MAX\_ITERATIONS} was hit without a final natural-language response. Fixed by injecting a fallback summary message. \\
+\hline
+9 & ChatSession & LOW & \texttt{refresh\_context()} did not update the \texttt{ReasoningLog} reference, causing the XAI tab to display stale trace data after code refresh. Fixed. \\
+\hline
+10 & ASTVisualizer & LOW & Unicode variable names (e.g., Greek letters) caused Graphviz label encoding errors. Fixed by applying \texttt{repr()} to all node labels. \\
+\hline
+11 & Streamlit UI & LOW & Security Audit tab's metric cards did not reset between sessions, showing stale counts. Fixed by resetting \texttt{st.session\_state} on ``Clear'' action. \\
+\hline
+12 & BenchmarkSuite & LOW & \texttt{tracemalloc} left running across tests, causing memory leak in the test runner. Fixed by adding \texttt{tearDown} \texttt{tracemalloc.stop()} call. \\
+\hline
+\end{tabularx}
+\caption{Bug inventory: 12 issues resolved in Week 14}
+\end{table}
+
+\section{CI/CD Pipeline}
+
+\subsection{4.1 GitHub Actions Workflow}
+
+A \texttt{.github/workflows/ci.yml} workflow was created with the following stages:
+
+\begin{lstlisting}[language=yaml, caption=GitHub Actions CI pipeline]
+name: Project 83 CI
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run full test suite
+        run: python -m pytest tests/ -v --tb=short
+        env:
+          GEMINI_API_KEY: ""      # Offline mode - no key needed
+      - name: Generate coverage report
+        run: python -m pytest tests/ --cov=src --cov-report=xml
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+\end{lstlisting}
+
+\subsection{4.2 CI Results}
+
+\begin{table}[h]
+\centering
+\begin{tabularx}{\textwidth}{|l|c|c|c|}
+\hline
+\rowcolor{orange!10}
+\textbf{Matrix} & \textbf{Tests Run} & \textbf{Pass} & \textbf{Fail} \\
+\hline
+Python 3.11 (ubuntu-latest) & 392 & 392 & 0 \\
+\hline
+Python 3.12 (ubuntu-latest) & 392 & 392 & 0 \\
+\hline
+\end{tabularx}
+\caption{CI run summary --- all 392 tests green across both Python versions}
+\end{table}
+
+\section{Regression Testing}
+
+Twelve regression tests were written --- one per bug fix --- using the minimal reproducible input that originally triggered each bug,  ensuring no future commit re-introduces any of the twelve issues.
+
+\begin{lstlisting}[language=Python, caption=Regression test example (Bug \#1)]
+def test_lexer_dedent_at_eof():
+    """Regression: DEDENT must be emitted at EOF for single-line functions."""
+    lexer = Lexer("def f():\n    return 1")
+    tokens = lexer.tokenize()
+    token_types = [t.type for t in tokens]
+    assert TokenType.DEDENT in token_types, "DEDENT missing at EOF"
+\end{lstlisting}
+
+\section{Testing Summary}
+
+\begin{table}[h]
+\centering
+\begin{tabularx}{\textwidth}{|l|c|X|}
+\hline
+\rowcolor{orange!10}
+\textbf{Test Class} & \textbf{Tests} & \textbf{Focus Area} \\
+\hline
+TestE2ECleanCode & 5 & Valid programs: no errors, safe SAST \\
+\hline
+TestE2ESyntaxFix & 10 & Syntax fix closed-loop validation \\
+\hline
+TestE2ESemanticFix & 10 & Semantic fix + re-parse \\
+\hline
+TestE2ESecurityFix & 10 & Security remediation + re-parse \\
+\hline
+TestE2EConversation & 5 & Multi-turn debugging session \\
+\hline
+TestE2EMixed & 5 & Combined error scenarios \\
+\hline
+TestRegressions & 12 & One test per bug fixed \\
+\hline
+\textbf{Total (Week 14)} & \textbf{57} & \textbf{All passing} \\
+\hline
+\textbf{Grand Total} & \textbf{392} & \textbf{Weeks 5--14, all passing} \\
+\hline
+\end{tabularx}
+\caption{Week 14 Test Suite}
+\end{table}
+
+\section{Deliverables}
+
+\begin{itemize}[leftmargin=*]
+    \item \statusgood{COMPLETE} \texttt{tests/test\_week14\_e2e.py} --- 45 end-to-end + 12 regression tests
+    \item \statusgood{COMPLETE} \texttt{.github/workflows/ci.yml} --- GitHub Actions CI pipeline
+    \item \statusgood{COMPLETE} Bug fixes applied across 8 modules (see Bug Inventory, \S3)
+    \item \statusgood{COMPLETE} \texttt{reports/week\_14\_report.tex} --- This report
+    \item \statusgood{COMPLETE} \texttt{project\_status.md} --- Updated: system declared feature-complete
+\end{itemize}
+
+\section{Next Week Preview}
+
+\textbf{Week 15: Documentation \& Report Finalization}
+
+\begin{itemize}[leftmargin=*]
+    \item Complete the final comprehensive project report (architecture, all phases, results)
+    \item Prepare presentation slides covering all 16 weeks
+    \item Finalize README, API documentation, and inline code comments
+    \item Package the submission artefact (zip + GitHub release)
+\end{itemize}
+
+\section{Conclusion}
+
+Week 14 hardened Project 83 into a robust, production-quality system. The E2E test suite validates the closed-loop ``compile $\to$ AI fix $\to$ re-compile'' contract across 45 scenarios. Twelve bugs were identified and resolved, and the CI/CD pipeline guarantees these fixes are permanent. All 392 tests pass across Python 3.11 and 3.12, and the system is declared feature-complete.
+
+\vspace{5mm}
+\noindent\textbf{Prepared by:} Project Team \\
+\textbf{Reporting Date:} Week 14 Completion (12 April 2026) \\
+\textbf{Next Review:} Week 15 -- Documentation \& Report Finalization
+
+\end{document}

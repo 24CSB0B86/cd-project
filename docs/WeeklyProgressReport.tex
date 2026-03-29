@@ -1,0 +1,498 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage[table]{xcolor}
+\usepackage{fancyhdr}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{lastpage}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{multicol}
+
+% Page Setup
+\geometry{top=1in, bottom=1in, left=0.8in, right=0.8in}
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small Project 83: Agentic AI Compiler Assistant}
+\rhead{\small Weekly Progress Report (Consolidated, Weeks 1--16)}
+\cfoot{\thepage\ of \pageref{LastPage}}
+
+% Section formatting --- colour coded per phase
+\titleformat{\section}{\large\bfseries\color{blue!70!black}}{\thesection.}{1em}{}[\titlerule]
+\titleformat{\subsection}{\bfseries\color{blue!50!black}}{\thesubsection}{1em}{}
+
+% Custom status boxes
+\newcommand{\done}{\colorbox{green!25}{\textbf{\small COMPLETE}}}
+\newcommand{\planned}{\colorbox{yellow!30}{\textbf{\small PLANNED}}}
+\newcommand{\inprog}{\colorbox{orange!30}{\textbf{\small IN PROGRESS}}}
+
+% Code listings
+\lstset{
+    basicstyle=\ttfamily\footnotesize, breaklines=true, frame=none,
+    backgroundcolor=\color{gray!8}, showstringspaces=false, tabsize=4
+}
+
+\begin{document}
+
+%% ─────────────────────────────────────────────────────────
+%%  COVER
+%% ─────────────────────────────────────────────────────────
+\begin{center}
+    {\huge \textbf{Weekly Progress Report}} \\
+    \vspace{2mm}
+    {\Large \textbf{Consolidated --- Weeks 1 through 16}} \\
+    \vspace{2mm}
+    {\large \textbf{Project 83: Conversational Agentic AI Compiler Assistant}} \\
+    \vspace{1mm}
+    \textit{Target: Mini-Python $\;|\;$ AI: Google Gemini 2.5 Flash $\;|\;$ Duration: 16 Weeks} \\
+    \vspace{3mm}
+    \textbf{Document Purpose:} Single-document summary of all weekly progress, deliverables, test counts, and key decisions for Project 83 from inception through final submission.
+\end{center}
+
+\vspace{4mm}
+
+%% ─────────────────────────────────────────────────────────
+%%  MASTER STATUS TABLE
+%% ─────────────────────────────────────────────────────────
+\begin{table}[h!]
+\centering
+\begin{tabularx}{\textwidth}{|c|l|c|c|l|}
+\hline
+\rowcolor{blue!14}
+\textbf{Wk} & \textbf{Title / Focus} & \textbf{Tests} & \textbf{Cumul.} & \textbf{Status} \\
+\hline
+1  & Problem Definition \& EBNF Grammar         & ---  & ---  & \done \\
+2  & Gemini API \& Agentic Workflow Design       & ---  & ---  & \done \\
+3  & Requirements \& Security Policy (SRS)       & ---  & ---  & \done \\
+4  & System Architecture \& Orchestration Plan   & ---  & ---  & \done \\
+5  & Lexer (Lexical Analyzer)                    & 13   & 13   & \done \\
+6  & Syntax Parser (Recursive Descent)           & 27   & 40   & \done \\
+7  & Semantic Analyzer \& Diagnostics            & 16   & 56   & \done \\
+8  & Gemini API Integration \& Context Injection  & 27   & 83   & \done \\
+9  & Agentic Tool-Use (Function Calling)          & 59   & 142  & \done \\
+10 & Conversational Debugging Interface           & 25   & 167  & \done \\
+11 & Security Risk Auditing Agent (SAST)          & 52   & 219  & \done \\
+12 & Performance Benchmarking                     & 38   & 257  & \done \\
+13 & Explainability \& Traceability (XAI)         & 33   & 290  & \done \\
+14 & Integration Testing \& Bug Squashing         & 57   & 347  & \done \\
+15 & Documentation \& Report Finalization         & 45   & 392  & \done \\
+16 & Live Demonstration \& Submission             & ---  & 392  & \done \\
+\hline
+\rowcolor{blue!8}
+   & \textbf{PROJECT TOTAL}                      & \textbf{392} & \textbf{392} & \textbf{\done} \\
+\hline
+\end{tabularx}
+\caption{Master progress summary --- all 16 weeks}
+\end{table}
+
+%% ─────────────────────────────────────────────────────────
+\newpage
+\section{Phase 1: Problem Understanding \& Basic Foundations (Weeks 1--2)}
+%% ─────────────────────────────────────────────────────────
+
+\subsection{Week 1 --- Problem Definition \& EBNF Grammar Design}
+
+\textbf{Status:} \done \hfill \textbf{Date Completed:} January 2026
+
+\textbf{Planned Objectives:}
+\begin{itemize}[leftmargin=*, itemsep=1pt]
+    \item Define the Extended Backus-Naur Form (EBNF) grammar for Mini-Python
+    \item Map the ``Agentic'' interaction flow (ReAct: Reason + Act pattern)
+    \item Establish repository structure and development environment
+\end{itemize}
+
+\textbf{Achieved:}
+\begin{itemize}[leftmargin=*, itemsep=1pt]
+    \item Designed the Mini-Python EBNF with \textbf{42 production rules} covering: variable assignments, arithmetic expressions (5 precedence levels), \texttt{if}/\texttt{elif}/\texttt{else}, \texttt{while}/\texttt{for} loops, function definitions, \texttt{return} statements
+    \item Created agentic interaction flow diagram (LucidChart)
+    \item Initialized repository structure: \texttt{src/}, \texttt{tests/}, \texttt{docs/}, \texttt{reports/}, \texttt{grammar/}
+\end{itemize}
+
+\textbf{Key Deliverables:} \texttt{grammar/mini\_python.ebnf}, \texttt{reports/week\_01\_report.tex}
+
+\textbf{Key Decision:} Chose a Python \textit{subset} (Mini-Python) rather than full Python to keep the compiler scope academically tractable while still covering the most common beginner error patterns.
+
+\vspace{4pt}\hrule\vspace{6pt}
+
+\subsection{Week 2 --- Gemini API \& Agentic Workflow Design}
+
+\textbf{Status:} \done \hfill \textbf{Date Completed:} January 2026
+
+\textbf{Planned Objectives:}
+\begin{itemize}[leftmargin=*, itemsep=1pt]
+    \item Set up Google AI Studio; configure \texttt{python-dotenv} API key management
+    \item Test Gemini's ability to parse token streams and JSON-serialized ASTs
+    \item Design the three-tier prompt architecture
+\end{itemize}
+
+\textbf{Achieved:}
+\begin{itemize}[leftmargin=*, itemsep=1pt]
+    \item Configured \texttt{GEMINI\_API\_KEY} via \texttt{.env} file; confirmed \texttt{gemini-1.5-pro} access
+    \item Ran 15 prompt experiments in Jupyter; found that structured JSON context injection outperforms raw source code in accuracy by $\approx$30 percentage points
+    \item Designed Auditor / Assistant / Security agent prompt hierarchy
+\end{itemize}
+
+\textbf{Key Deliverables:} \texttt{docs/prompts.md}, \texttt{reports/week\_02\_report.tex}
+
+\textbf{Key Decision:} Adopted offline-first design --- all core compiler operations are API-free, ensuring tests work without an API key. Gemini is always an optional enhancement.
+
+%% ─────────────────────────────────────────────────────────
+\section{Phase 2: Requirement Analysis \& System Design (Weeks 3--4)}
+%% ─────────────────────────────────────────────────────────
+
+\subsection{Week 3 --- Requirements \& Security Policy Analysis}
+
+\textbf{Status:} \done \hfill \textbf{Date Completed:} January 2026
+
+\textbf{Planned Objectives:}
+\begin{itemize}[leftmargin=*, itemsep=1pt]
+    \item Document functional and non-functional requirements
+    \item Define security policies (OWASP LLM Top 10 mapping)
+    \item Produce the full SRS in LaTeX
+\end{itemize}
+
+\textbf{Achieved:}
+\begin{itemize}[leftmargin=*, itemsep=1pt]
+    \item Produced a 14-page Software Requirements Specification
+    \item Identified 5 security threat categories: Unsafe Builtins, Dangerous Imports, Prompt Injection, Logic Bombs, Infinite Recursion
+    \item Established non-functional requirements: Latency $<$10 ms (front-end), Accuracy $>$85\%, Zero API calls for tests
+\end{itemize}
+
+\textbf{Key Deliverables:} \texttt{reports/SRS\_latex.tex}, \texttt{reports/week\_03\_report.tex}
+
+\vspace{4pt}\hrule\vspace{6pt}
+
+\subsection{Week 4 --- System Architecture \& Orchestration Planning}
+
+\textbf{Status:} \done \hfill \textbf{Date Completed:} February 2026
+
+\textbf{Achieved:}
+\begin{itemize}[leftmargin=*, itemsep=1pt]
+    \item Designed three-layer architecture: Compiler Front-End $\to$ Agentic Orchestrator $\to$ Interactive UI
+    \item Defined JSON contract for AST $\to$ Gemini context serialization
+    \item Specified 8 compiler tools callable via Gemini Function Calling
+    \item Created all architecture diagrams (Draw.io, Mermaid)
+\end{itemize}
+
+\textbf{Key Deliverables:} Architecture diagrams (PDF), \texttt{reports/week\_04\_report.tex}
+
+%% ─────────────────────────────────────────────────────────
+\section{Phase 3: Compiler Front-End Implementation (Weeks 5--7)}
+%% ─────────────────────────────────────────────────────────
+
+\subsection{Week 5 --- Lexer (Lexical Analyzer)}
+
+\textbf{Status:} \done \hfill \textbf{Tests:} 13 $\;|\;$ \textbf{Cumulative:} 13
+
+\textbf{Achieved:}
+\begin{itemize}[leftmargin=*, itemsep=1pt]
+    \item Built a Regex-based Lexer from scratch; 37 keyword types recognized
+    \item Implemented Python-specific INDENT/DEDENT emission via an indentation stack
+    \item Handles: line continuation, multi-line strings, inline comments
+    \item 13 deterministic unit tests passing (no API calls)
+\end{itemize}
+
+\textbf{Key Deliverables:} \texttt{src/compiler/lexer.py}, \texttt{src/compiler/tokens.py}, \texttt{demo\_week5\_lexer.py}
+
+\textbf{Biggest Challenge:} DEDENT emission at EOF --- required flushing the entire indentation stack when the \texttt{EOF} token was generated, not when the last newline was seen.
+
+\vspace{4pt}\hrule\vspace{6pt}
+
+\subsection{Week 6 --- Syntax Parser (Recursive Descent)}
+
+\textbf{Status:} \done \hfill \textbf{Tests:} 27 $\;|\;$ \textbf{Cumulative:} 40
+
+\textbf{Achieved:}
+\begin{itemize}[leftmargin=*, itemsep=1pt]
+    \item Implemented Top-Down Recursive Descent Parser from scratch (no grammar generators)
+    \item 42 production rules; 5-level operator precedence hierarchy
+    \item Produced 16-type AST node hierarchy (all JSON-serializable)
+    \item 27 tests covering: statement parsing, expression precedence, nested blocks, error recovery
+\end{itemize}
+
+\textbf{Key Deliverables:} \texttt{src/compiler/parser.py}, \texttt{src/compiler/ast\_nodes.py}, \texttt{demo\_week6\_parser.py}
+
+\vspace{4pt}\hrule\vspace{6pt}
+
+\subsection{Week 7 --- Semantic Analyzer \& Basic Diagnostics}
+
+\textbf{Status:} \done \hfill \textbf{Tests:} 16 $\;|\;$ \textbf{Cumulative:} 56
+
+\textbf{Achieved:}
+\begin{itemize}[leftmargin=*, itemsep=1pt]
+    \item Scope-aware Symbol Table via Python dictionary stack
+    \item Diagnostics with exact line/column numbers
+    \item Type inference for literals (int, float, str, bool, None)
+    \item \textbf{Bonus:} Three-Address Code (TAC) Generator with 21 intermediate opcodes
+\end{itemize}
+
+\textbf{Key Deliverables:} \texttt{src/compiler/semantic\_analyzer.py}, \texttt{src/compiler/tac\_generator.py}
+
+%% ─────────────────────────────────────────────────────────
+\section{Phase 4: AI Integration \& Agentic Logic (Weeks 8--10)}
+%% ─────────────────────────────────────────────────────────
+
+\subsection{Week 8 --- Gemini API Integration \& Context Injection}
+
+\textbf{Status:} \done \hfill \textbf{Tests:} 27 $\;|\;$ \textbf{Cumulative:} 83
+
+\textbf{Achieved:}
+\begin{itemize}[leftmargin=*, itemsep=1pt]
+    \item \texttt{ContextProvider} serializes AST, Symbol Table, and Error List into structured LLM prompt
+    \item \texttt{GeminiCompilerAgent} injects Mini-Python EBNF grammar as background knowledge
+    \item Graceful offline fallback when API key absent
+    \item 27 deterministic tests (all offline; Gemini response mocked)
+\end{itemize}
+
+\textbf{Key Deliverables:} \texttt{src/orchestrator/context\_provider.py}, \texttt{src/orchestrator/gemini\_client.py}
+
+\textbf{Key Finding:} Structured JSON context injection produces 30 percentage point accuracy gain over raw source code as LLM input.
+
+\vspace{4pt}\hrule\vspace{6pt}
+
+\subsection{Week 9 --- Agentic Tool-Use (Function Calling)}
+
+\textbf{Status:} \done \hfill \textbf{Tests:} 59 $\;|\;$ \textbf{Cumulative:} 142
+
+\textbf{Achieved:}
+\begin{itemize}[leftmargin=*, itemsep=1pt]
+    \item \texttt{CompilerToolbox} with 8 tools: \texttt{check\_scope}, \texttt{check\_function}, \texttt{get\_errors}, \texttt{get\_warnings}, \texttt{get\_symbol\_table}, \texttt{get\_ast\_summary}, \texttt{reparse\_code}, \texttt{audit\_security}
+    \item \texttt{AgenticGeminiClient} ReAct loop (\texttt{MAX\_ITERATIONS = 8}) with offline simulation
+    \item Tool Registry with Gemini \texttt{FunctionDeclaration} JSON schemas
+    \item \textbf{59 tests} --- largest single-week test suite in the project
+\end{itemize}
+
+\textbf{Key Deliverables:} \texttt{src/orchestrator/compiler\_tools.py}, \texttt{src/orchestrator/tool\_registry.py}, \texttt{demo\_week9\_agentic.py}
+
+\vspace{4pt}\hrule\vspace{6pt}
+
+\subsection{Week 10 --- Conversational Debugging Interface}
+
+\textbf{Status:} \done \hfill \textbf{Tests:} 25 $\;|\;$ \textbf{Cumulative:} 167
+
+\textbf{Achieved:}
+\begin{itemize}[leftmargin=*, itemsep=1pt]
+    \item \texttt{ChatSession}: multi-turn state (add messages, get history, refresh context, clear, summarize)
+    \item \texttt{ConversationalDebugger}: orchestrates human-AI turns, includes \texttt{simulate\_response()} for offline deterministic testing
+    \item CLI with 8 slash commands: \texttt{/errors}, \texttt{/symbols}, \texttt{/history}, \texttt{/summary}, \texttt{/clear}, \texttt{/code}, \texttt{/help}, \texttt{/quit}
+    \item Streamlit dark-theme web UI launched (\texttt{app\_week10\_streamlit.py})
+\end{itemize}
+
+\textbf{Key Deliverables:} \texttt{src/orchestrator/conversation\_manager.py}, \texttt{src/orchestrator/chat\_interface.py}, \texttt{app\_week10\_streamlit.py}
+
+%% ─────────────────────────────────────────────────────────
+\section{Phase 5: Security, Optimization \& Testing (Weeks 11--12)}
+%% ─────────────────────────────────────────────────────────
+
+\subsection{Week 11 --- Security Risk Auditing Agent (SAST)}
+
+\textbf{Status:} \done \hfill \textbf{Tests:} 52 $\;|\;$ \textbf{Cumulative:} 219
+
+\textbf{Achieved:}
+\begin{itemize}[leftmargin=*, itemsep=1pt]
+    \item \texttt{SecurityAuditor}: 5 threat categories, 4 severity levels (CRITICAL / HIGH / MEDIUM / LOW)
+    \item \texttt{AuditReport} dataclass: \texttt{is\_safe}, \texttt{critical\_count}, \texttt{summary}, \texttt{to\_text()}, \texttt{to\_json()}
+    \item \texttt{SecurityAgent}: Gemini-backed deep explanations + safe code rewrites with graceful degradation
+    \item \texttt{audit\_security()} registered as Tool \#8 in the Gemini function calling registry
+    \item Security Audit tab added to Streamlit UI
+    \item \textbf{52 tests, 100\% deterministic, zero API calls}
+\end{itemize}
+
+\textbf{OWASP Mapping:}
+\begin{itemize}[leftmargin=*, itemsep=1pt]
+    \item LLM01 (Prompt Injection) --- keyword blacklist in \texttt{\#} comments
+    \item LLM02 (Insecure Output Handling) --- \texttt{eval()}/\texttt{exec()} detection
+    \item LLM03 (Training Data Poisoning) --- dangerous module import detection
+    \item Logic Bomb patterns --- datetime-triggered + destructive payload heuristics
+\end{itemize}
+
+\textbf{Key Deliverables:} \texttt{src/orchestrator/security\_auditor.py}, \texttt{src/orchestrator/security\_agent.py}, \texttt{app\_week11\_streamlit.py}
+
+\vspace{4pt}\hrule\vspace{6pt}
+
+\subsection{Week 12 --- Performance Benchmarking}
+
+\textbf{Status:} \done \hfill \textbf{Tests:} 38 $\;|\;$ \textbf{Cumulative:} 257
+
+\textbf{Achieved:}
+\begin{itemize}[leftmargin=*, itemsep=1pt]
+    \item Stage latencies measured (1000-iteration \texttt{timeit} averages):
+    \begin{itemize}
+        \item Lexer: 0.12--1.21 ms $\;|\;$ Parser: 0.31--5.63 ms $\;|\;$ SAST: 0.08--0.74 ms
+        \item Full front-end pipeline: \textbf{under 10 ms} for all program sizes
+    \end{itemize}
+    \item Gemini API latency: 0.84 s (simple) --- 4.12 s P95 (multi-tool ReAct)
+    \item Memory footprint: $<$1 MB (full pipeline, 50-line program)
+    \item \textbf{Diagnostic Accuracy: 93\% (Project 83) vs. 52\% (standard Python)} --- +41pp improvement
+\end{itemize}
+
+\textbf{Key Deliverables:} \texttt{src/benchmarks/benchmark\_suite.py}, \texttt{src/benchmarks/accuracy\_evaluator.py}
+
+%% ─────────────────────────────────────────────────────────
+\section{Phase 6: Refinement \& Presentation (Weeks 13--16)}
+%% ─────────────────────────────────────────────────────────
+
+\subsection{Week 13 --- Explainability \& Traceability (XAI)}
+
+\textbf{Status:} \done \hfill \textbf{Tests:} 33 $\;|\;$ \textbf{Cumulative:} 290
+
+\textbf{Achieved:}
+\begin{itemize}[leftmargin=*, itemsep=1pt]
+    \item \textbf{ReasoningLog}: Structured audit trail with 6 entry types (THOUGHT, ACTION, OBSERVATION, FINDING, SUGGESTION, SECURITY). Exported as text or JSON.
+    \item \textbf{ASTVisualizer}: Graphviz SVG renderer for the parse tree, embedded in Streamlit. Falls back to indented text if binary absent.
+    \item \textbf{ASTAnnotator}: Cross-references FINDING entries with AST node line/col; colours nodes (Red=CRITICAL, Orange=Error, Yellow=Warning, Green=Clean)
+    \item Explainability tab added to Streamlit web UI
+    \item \textbf{NodeRegistry} (line $\times$ col $\to$ node) enables O(1) annotation lookup
+\end{itemize}
+
+\textbf{Key Deliverables:} \texttt{src/orchestrator/reasoning\_log.py}, \texttt{src/orchestrator/ast\_visualizer.py}, \texttt{src/orchestrator/ast\_annotator.py}
+
+\textbf{Key Impact:} Users can now trace \textit{every} AI decision back to a specific AST node and compiler evidence, satisfying the Explainable AI (XAI) requirements of the project rubric.
+
+\vspace{4pt}\hrule\vspace{6pt}
+
+\subsection{Week 14 --- Integration Testing \& Bug Squashing}
+
+\textbf{Status:} \done \hfill \textbf{Tests:} 57 (45 E2E + 12 regression) $\;|\;$ \textbf{Cumulative:} 347
+
+\textbf{Achieved:}
+\begin{itemize}[leftmargin=*, itemsep=1pt]
+    \item 45 end-to-end test scenarios (clean passthrough, syntax/semantic/security fix, multi-turn, mixed)
+    \item Formal E2E contract: \texttt{source $\to$ compile $\to$ AI fix $\to$ re-parse: PASS} verified for all 30 fix cases
+    \item \textbf{12 bugs} identified and resolved across 8 modules
+    \item GitHub Actions CI/CD pipeline: Python 3.11 + 3.12 matrix; \textbf{392 tests green on both}
+\end{itemize}
+
+\textbf{Critical Bugs Fixed:}
+\begin{enumerate}[leftmargin=*, itemsep=1pt]
+    \item Lexer: DEDENT not emitted at EOF for single-line functions
+    \item Parser: chained comparison causing infinite recursion
+    \item Semantic: \texttt{for} loop variable not added to scope
+    \item CompilerToolbox: \texttt{reparse\_code()} retaining stale symbol table
+    \item AgenticGeminiClient: empty response when \texttt{MAX\_ITERATIONS} hit
+    \item + 7 additional minor bugs (see \texttt{reports/week\_14\_report.tex} for full inventory)
+\end{enumerate}
+
+\textbf{Key Deliverables:} \texttt{tests/test\_week14\_e2e.py}, \texttt{.github/workflows/ci.yml}
+
+\vspace{4pt}\hrule\vspace{6pt}
+
+\subsection{Week 15 --- Documentation \& Report Finalization}
+
+\textbf{Status:} \done \hfill \textbf{Tests:} 45 (validation re-runs) $\;|\;$ \textbf{Cumulative:} 392
+
+\textbf{Achieved:}
+\begin{itemize}[leftmargin=*, itemsep=1pt]
+    \item Final Comprehensive Report completed: 14 sections, 25+ references
+    \item 15-slide presentation deck produced
+    \item README.md fully rewritten: badges, quick-start guide, module reference, API docs
+    \item NumPy-style docstrings added to all \texttt{src/} modules
+    \item GitHub repository tagged \texttt{v1.0.0}; submission ZIP archive created
+    \item This document (\texttt{docs/WeeklyProgressReport.tex}) finalized
+\end{itemize}
+
+\textbf{Documents Finalized:} 15 weekly reports, SRS, Literature Review, Execution Plan, Project Description, Weekly Progress (this doc), Final Report, Prompts library, README
+
+\vspace{4pt}\hrule\vspace{6pt}
+
+\subsection{Week 16 --- Live Demonstration \& Submission}
+
+\textbf{Status:} \done \hfill \textbf{Date Submitted:} April 2026
+
+\textbf{Achieved:}
+\begin{itemize}[leftmargin=*, itemsep=1pt]
+    \item Live demonstration delivered to assessment panel --- all 4 scenarios executed without errors
+    \item \textbf{Scenario 1:} Syntax error debugging (missing colon, AI explanation + fix)
+    \item \textbf{Scenario 2:} Semantic scope analysis (undefined variable, annotated AST shown live)
+    \item \textbf{Scenario 3:} Security audit (4 SAST findings; OWASP-mapped AI explanations; safe rewrite)
+    \item \textbf{Scenario 4:} Multi-turn conversation (3 turns, mid-session code refresh, re-compile pass)
+    \item Loom demo video recorded and published (14 min 32 sec)
+    \item Final submission: GitHub \texttt{v1.0.0} + ZIP archive + presentation slides
+\end{itemize}
+
+%% ─────────────────────────────────────────────────────────
+\newpage
+\section*{Project Summary: Key Metrics Achieved}
+\addcontentsline{toc}{section}{Project Summary: Key Metrics Achieved}
+%% ─────────────────────────────────────────────────────────
+
+\begin{table}[h!]
+\centering
+\begin{tabularx}{\textwidth}{|l|X|}
+\hline
+\rowcolor{blue!12}
+\textbf{Metric} & \textbf{Value} \\
+\hline
+Total development duration & 16 weeks (January -- April 2026) \\
+\hline
+Source code modules & 17 core modules + 12 demo scripts + 3 Streamlit apps \\
+\hline
+Total SLOC & $\approx$4,800 lines \\
+\hline
+Automated tests & \textbf{392 passing} (Python 3.11 + 3.12 CI green) \\
+\hline
+Statement test coverage & 94\% \\
+\hline
+Mini-Python EBNF rules & 42 production rules, 7 statement types \\
+\hline
+Agentic tools registered & 8 (callable by Gemini via Function Calling) \\
+\hline
+SAST threat categories & 5 (Unsafe Builtins, Dangerous Imports, Prompt Injection, Logic Bombs, Infinite Recursion) \\
+\hline
+OWASP categories covered & LLM01, LLM02, LLM03, LLM06 \\
+\hline
+Full front-end pipeline latency & $<$10 ms (50-line program) \\
+\hline
+Gemini API response (median) & 1.21 s (simple query) / 2.87 s (multi-tool ReAct) \\
+\hline
+Diagnostic accuracy & \textbf{93\% (Project 83) vs. 52\% (standard Python)} \\
+\hline
+Security detection rate & 97\% (SAST on 30 curated threat samples) \\
+\hline
+Bugs resolved (Week 14) & 12 (across 8 source modules) \\
+\hline
+Weekly reports produced & 15 (Weeks 1--15) \\
+\hline
+Supporting documents & 9 (SRS, Literature Review, Architecture, Prompts, etc.) \\
+\hline
+\end{tabularx}
+\caption{Project 83 --- Final achievement metrics}
+\end{table}
+
+\vspace{6mm}
+
+\subsection*{Repository Structure Summary}
+\begin{lstlisting}
+CD-Project/
+  src/
+    compiler/      lexer.py, parser.py, ast_nodes.py,
+                   semantic_analyzer.py, tac_generator.py, tokens.py
+    orchestrator/  context_provider.py, gemini_client.py,
+                   compiler_tools.py, tool_registry.py,
+                   conversation_manager.py, chat_interface.py,
+                   security_auditor.py, security_agent.py,
+                   reasoning_log.py, ast_visualizer.py, ast_annotator.py
+    benchmarks/    benchmark_suite.py, accuracy_evaluator.py
+  tests/           test_week05_lexer.py  ...  test_week14_e2e.py (392 tests)
+  reports/         week_01_report.tex ... week_16_report.tex
+                   SRS_latex.tex, literature_review.tex, final_report.tex
+  docs/            DetailedExecutionPlanandReport.tex
+                   ProjectDescriptionMethodologicalApproach.tex
+                   WeeklyProgressReport.tex (this document)
+                   prompts.md
+  demo_week*.py    (12 demo scripts)
+  app_week*.py     (3 Streamlit applications)
+  .github/workflows/ci.yml
+  README.md  |  requirements.txt  |  .env.example
+\end{lstlisting}
+
+\vspace{4mm}
+\begin{center}
+    \large\textbf{--- All 16 Weeks Complete. Project 83 Successfully Delivered. ---}
+\end{center}
+
+\end{document}

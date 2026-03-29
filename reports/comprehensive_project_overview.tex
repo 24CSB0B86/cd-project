@@ -1,0 +1,816 @@
+% ============================================================
+% PROJECT 83: AGENTIC AI COMPILER ASSISTANT
+% Comprehensive Project Documentation
+% ============================================================
+\documentclass[a4paper,11pt]{article}
+
+% --- Packages ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage[table]{xcolor}
+\usepackage{fancyhdr}
+\usepackage{tabularx}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{lastpage}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{tcolorbox}
+\usepackage{amsmath}
+\usepackage{array}
+\usepackage{mdframed}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning}
+
+% --- Page Layout ---
+\geometry{top=1in, bottom=1in, left=0.9in, right=0.9in}
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small Project 83: Agentic AI Compiler Assistant}
+\rhead{\small Comprehensive Project Documentation}
+\cfoot{\thepage\ of \pageref{LastPage}}
+
+% --- Section Formatting ---
+\titleformat{\section}{\Large\bfseries\color{blue!70!black}}{\thesection.}{1em}{}[\titlerule]
+\titleformat{\subsection}{\large\bfseries\color{blue!50!black}}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}{\bfseries\color{blue!30!black}}{\thesubsubsection}{1em}{}
+
+% --- Code Listing Style ---
+\lstset{
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true,
+    frame=single,
+    backgroundcolor=\color{gray!8},
+    keywordstyle=\color{blue!80!black}\bfseries,
+    stringstyle=\color{green!50!black},
+    commentstyle=\color{gray}\itshape,
+    showstringspaces=false,
+    tabsize=4,
+    captionpos=b,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    numbersep=5pt
+}
+
+% --- Custom Commands ---
+\newcommand{\statusdone}[1]{\colorbox{green!20}{\textbf{\texttt{#1}}}}
+\newcommand{\statuspending}[1]{\colorbox{yellow!20}{\textbf{\texttt{#1}}}}
+\newcommand{\statusbonus}[1]{\colorbox{purple!15}{\textbf{\texttt{#1}}}}
+\newcommand{\gap}[1]{\textit{\textbf{Gap:} #1}}
+\newcommand{\solution}[1]{\textit{\textbf{Solution:} #1}}
+
+% ============================================================
+\begin{document}
+% ============================================================
+
+% -------- TITLE PAGE --------
+\begin{titlepage}
+\centering
+\vspace*{2cm}
+{\Huge\bfseries\color{blue!70!black} Project 83}\\[6pt]
+{\LARGE\bfseries Conversational Agentic AI Compiler Assistant}\\[10pt]
+{\Large Comprehensive Project Documentation}\\[2cm]
+
+\begin{tcolorbox}[colback=blue!5!white, colframe=blue!60!black, width=0.85\textwidth]
+\centering
+\textbf{A custom-built Mini-Python compiler front-end, integrated with\\
+Google Gemini 2.5 Flash AI, that provides conversational,\\
+context-aware error explanations and code fix suggestions.}
+\end{tcolorbox}
+
+\vspace{1.5cm}
+\begin{tabular}{ll}
+\toprule
+\textbf{Project ID}     & Project 83 \\
+\textbf{Target Language}& Mini-Python (Python Subset) \\
+\textbf{AI Engine}      & Google Gemini 2.5 Flash (via \texttt{google-generativeai}) \\
+\textbf{Language}       & Python 3.12 \\
+\textbf{Current Phase}  & Week 8 --- Gemini Integration \& Context Injection \\
+\textbf{Test Count}     & 128 tests --- All Passing \\
+\textbf{Status Date}    & February 24, 2026 \\
+\bottomrule
+\end{tabular}
+
+\vfill
+{\large\textit{Pipeline:} Source Code $\rightarrow$ Lexer $\rightarrow$ Parser $\rightarrow$ Semantic Analyzer $\rightarrow$ Context Provider $\rightarrow$ Gemini AI}
+\end{titlepage}
+
+% -------- TABLE OF CONTENTS --------
+\tableofcontents
+\newpage
+
+% ============================================================
+\section{Project Overview and Motivation}
+% ============================================================
+
+\subsection{Problem Statement}
+
+Traditional compilers, even modern ones like CPython, produce error messages that are:
+\begin{itemize}
+    \item \textbf{Cryptic} for beginners and intermediate programmers
+    \item \textbf{Context-free} --- they report \textit{what} went wrong but not \textit{why} or \textit{how} to fix it
+    \item \textbf{Security-blind} --- they cannot identify code that is syntactically valid but logically dangerous (e.g., using \texttt{eval()}, command injection patterns)
+    \item \textbf{Non-conversational} --- the developer gets a one-time error message with no ability to ask follow-up questions
+\end{itemize}
+
+\subsection{Project Vision}
+
+Project 83 addresses these gaps by building a \textbf{Conversational Agentic AI Compiler Assistant}. The project transforms a standard compiler workflow --- where the tool simply reports errors and stops --- into an \textbf{interactive debugging partnership} between the developer and an AI agent that has deep knowledge of the code's structure.
+
+The system is built in two parallel tracks:
+\begin{enumerate}
+    \item \textbf{Compiler Front-End}: A complete, hand-crafted compiler pipeline for a Python subset (Mini-Python) built from scratch --- no compiler-generators (ANTLR, PLY, etc.) are used.
+    \item \textbf{Agentic AI Layer}: Google Gemini 2.5 Flash is wrapped with custom orchestration logic that feeds it the compiler's internal state (AST, Symbol Table, Errors) as structured context, enabling grammar-grounded, intelligent explanations.
+\end{enumerate}
+
+\subsection{What Was Needed vs. What Was Delivered}
+
+\begin{table}[h!]
+\centering
+\begin{tabularx}{\textwidth}{|l|X|X|}
+\hline
+\rowcolor{blue!10}
+\textbf{Week} & \textbf{What Was Needed} & \textbf{What Was Delivered} \\
+\hline
+1 & Project definition, EBNF grammar design, agent interaction flow planning & Grammar file (\texttt{mini\_python.ebnf}), project structure, interaction flow diagrams \\
+\hline
+2 & Gemini API setup, prompt architecture, basic AI test cases & Working \texttt{gemini\_client.py}, \texttt{.env} key management, AI test cases \\
+\hline
+3 & SRS document, security threat model & Software Requirements Spec (SRS), threat model \\
+\hline
+4 & Architecture design, module interaction diagrams, tech stack justification & Architecture blueprint, module interaction docs, compiler directory structure \\
+\hline
+5 & Regex-based Lexer for Mini-Python & \texttt{lexer.py} with indentation handling, 13 unit tests passing \\
+\hline
+6 & Recursive Descent Parser, AST construction & \texttt{parser.py} + \texttt{ast\_nodes.py} with 16 node types, 27 tests passing \\
+\hline
+7 & Symbol Table, scope analysis, type checking, diagnostics & \texttt{semantic\_analyzer.py} with full scope stack, 16 tests passing \\
+\hline
+8 & Gemini Context Provider, secure API integration & \texttt{context\_provider.py} + enhanced \texttt{gemini\_client.py}, 27 deterministic tests. \textbf{Bonus:} TAC generator (39 tests) \\
+\hline
+\end{tabularx}
+\caption{Planned objectives vs. delivered results by week}
+\end{table}
+
+
+% ============================================================
+\section{Technologies and Tools Used}
+% ============================================================
+
+\subsection{Core Programming Language and Runtime}
+
+\begin{itemize}
+    \item \textbf{Python 3.12}: The primary implementation language. Used for all compiler components and the AI orchestration layer.
+    \item \textbf{Python \texttt{re} module}: Powers the regex-based lexer tokenizer.
+    \item \textbf{Python \texttt{enum} module}: Defines the \texttt{TokenType} and \texttt{SymbolType} enumerations for type safety.
+    \item \textbf{Python \texttt{dataclasses}}: Used to define all 16 AST node classes cleanly and concisely.
+    \item \textbf{Python \texttt{typing}}: Provides type hints throughout all modules for maintainability.
+    \item \textbf{Python \texttt{logging}}: Used in the Gemini client for structured logging (replacing debug print statements).
+\end{itemize}
+
+\subsection{AI / Machine Learning Stack}
+
+\begin{itemize}
+    \item \textbf{Google Gemini 2.5 Flash (\texttt{models/gemini-2.5-flash})}: The large language model (LLM) used as the agent's reasoning engine. Accessed via the official Python SDK.
+    \item \textbf{\texttt{google-generativeai}}: Official Google Python client library for the Gemini API. Provides model instantiation, chat sessions, function calling, and safety filter management.
+    \item \textbf{System Prompt Injection}: The Gemini model is initialized with a persistent system instruction containing the project's EBNF grammar, agent role definition, and ReAct reasoning rules.
+    \item \textbf{Context Injection (RAG-like)}: The compiler's internal state is serialized into natural language and injected into every Gemini prompt, acting as a retrieval-augmented context layer.
+    \item \textbf{ReAct (Reason + Act) Pattern}: The agent is instructed to first reason about the error against the grammar before producing a response or suggesting a fix.
+\end{itemize}
+
+\subsection{Development and Testing Tools}
+
+\begin{itemize}
+    \item \textbf{pytest}: Testing framework for all 128 unit and integration tests.
+    \item \textbf{python-dotenv}: Secure API key management via \texttt{.env} file.
+    \item \textbf{LaTeX (Overleaf)}: All project reports and documentation written in professional LaTeX.
+    \item \textbf{Draw.io / LucidChart}: Used for architecture and interaction flow diagrams during planning phases.
+\end{itemize}
+
+\subsection{Grammar Specification}
+
+The project uses \textbf{EBNF (Extended Backus-Naur Form)} to formally define the Mini-Python grammar targeted by the compiler. This grammar file (\texttt{grammar/mini\_python.ebnf}) serves as the single source-of-truth for both the parser implementation and the AI agent's reasoning.
+
+\begin{lstlisting}[language=, caption=Mini-Python EBNF Grammar (grammar/mini\_python.ebnf)]
+program         = { statement } ;
+statement       = assignment | if_stmt | while_stmt | func_def | print_stmt ;
+assignment      = identifier , "=" , expression , NEWLINE ;
+if_stmt         = "if" , condition , ":" , block , [ "else" , ":" , block ] ;
+while_stmt      = "while" , condition , ":" , block ;
+func_def        = "def" , identifier , "(" , [ params ] , ")" , ":" , block ;
+print_stmt      = "print" , "(" , expression , ")" , NEWLINE ;
+block           = NEWLINE , INDENT , { statement } , DEDENT ;
+expression      = term , { ( "+" | "-" ) , term } ;
+term            = factor , { ( "*" | "/" ) , factor } ;
+factor          = identifier | number | "(" , expression , ")" ;
+condition       = expression , comp_op , expression ;
+comp_op         = "==" | "!=" | "<" | ">" | "<=" | ">=" ;
+identifier      = letter , { letter | digit | "_" } ;
+number          = digit , { digit } ;
+\end{lstlisting}
+
+
+% ============================================================
+\section{System Architecture}
+% ============================================================
+
+\subsection{Three-Layer Architecture}
+
+The system is organized into three distinct architectural layers, each with a clear responsibility:
+
+\begin{tcolorbox}[colback=blue!3!white, colframe=blue!60!black, title={System Layers Overview}]
+\begin{description}[style=nextline]
+    \item[Layer 1 --- Deterministic Compiler Front-End]
+    Hand-crafted lexer, parser, and semantic analyzer. Produces the AST, Symbol Table, and error diagnostics. No AI involved in this layer.
+    
+    \item[Layer 2 --- Agentic Orchestration Layer (Gemini AI)]
+    The Context Provider serializes compiler output into natural language. The Gemini client sends this context to the AI with a system prompt embedding the grammar. The AI reasons using ReAct patterns.
+    
+    \item[Layer 3 --- Conversational Interface (Planned)]
+    A Streamlit web UI or Rich CLI allowing users to submit code, see diagnostics, and engage in a follow-up conversation with the AI agent.
+\end{description}
+\end{tcolorbox}
+
+\subsection{Data Flow Pipeline}
+
+The end-to-end compilation and AI analysis pipeline can be described as:
+
+\[
+\text{Source Code} \xrightarrow{\text{Lexer}} \text{Tokens} \xrightarrow{\text{Parser}} \text{AST} \xrightarrow{\text{Semantic Analyzer}} \text{Symbols + Errors} \xrightarrow{\text{Context Provider}} \text{Natural Language} \xrightarrow{\text{Gemini}} \text{Explanation}
+\]
+
+\begin{table}[h!]
+\centering
+\begin{tabularx}{\textwidth}{|c|l|l|X|}
+\hline
+\rowcolor{blue!10}
+\textbf{Phase} & \textbf{Component} & \textbf{File} & \textbf{Output} \\
+\hline
+1 & Tokenizer & \texttt{lexer.py} & Stream of typed Tokens \\
+\hline
+2 & AST Builder & \texttt{parser.py} & Hierarchical AST (Program node) \\
+\hline
+3 & Symbol Table & \texttt{semantic\_analyzer.py} & Scope-annotated symbol records \\
+\hline
+4 & Diagnostics & \texttt{semantic\_analyzer.py} & SemanticError / Warning list \\
+\hline
+5 & Context Serialization & \texttt{context\_provider.py} & Natural language context string \\
+\hline
+6 & AI Reasoning & \texttt{gemini\_client.py} & Conversational error explanation \\
+\hline
+\end{tabularx}
+\caption{Complete pipeline phase-by-phase}
+\end{table}
+
+\subsection{Directory Structure}
+
+\begin{lstlisting}[language=, caption=Project Directory Layout]
+CD-Project/
+|--- src/
+|    |--- compiler/
+|    |    |--- tokens.py           # TokenType enum + Token class
+|    |    |--- lexer.py            # Regex-based Lexer + indentation tracking
+|    |    |--- ast_nodes.py        # 16 AST node dataclasses
+|    |    |--- parser.py           # Recursive Descent Parser
+|    |    |--- semantic_analyzer.py # Symbol Table + Scope + Type checks
+|    |    `--- tac_generator.py    # [BONUS] Three-Address Code generator
+|    `--- orchestrator/
+|         |--- context_provider.py # Compiler state -> natural language
+|         `--- gemini_client.py    # Gemini API wrapper + system prompt
+|--- tests/
+|    |--- test_week5_lexer.py      # 13 Lexer tests
+|    |--- test_week6_parser.py     # 27 Parser tests
+|    |--- test_week7_semantic.py   # 16 Semantic tests
+|    |--- test_week8_context.py    # 27 Context Provider tests
+|    |--- test_week8_tac.py        # 39 TAC Generator tests [BONUS]
+|    `--- test_integration_weeks5_7.py  # 6 integration tests
+|--- grammar/
+|    `--- mini_python.ebnf         # Formal grammar specification
+|--- docs/
+|    |--- ProjectDescriptionMethodologicalApproach.tex
+|    |--- DetailedExecutionPlanandReport.tex
+|    `--- prompts.md
+|--- reports/
+|    |--- week_01_report.tex ... week_08_report.tex
+|    |--- SRS_latex.tex
+|    `--- comprehensive_project_documentation.tex
+|--- demo_week5_lexer.py   ... demo_week8_tac.py
+|--- requirements.txt
+`--- .env                          # GEMINI_API_KEY (not committed)
+\end{lstlisting}
+
+
+% ============================================================
+\section{Implementation Deep-Dive}
+% ============================================================
+
+\subsection{Week 5: Lexical Analyzer (Lexer)}
+
+\subsubsection{What It Does}
+
+The Lexer (\texttt{src/compiler/lexer.py}) is the first stage of compilation. It converts raw Mini-Python source code into a flat sequence of typed \textbf{Token} objects.
+
+\subsubsection{Key Design Decisions}
+
+\begin{itemize}
+    \item \textbf{Regex-Based Scanning}: A single compiled regex pattern (using alternation with named groups \texttt{(?P<NAME>pattern)}) matches every token type in a single pass using Python's \texttt{re.match}.
+    \item \textbf{Python-Specific Indentation}: Python's significant whitespace (indentation as block delimiters) is handled explicitly. An \texttt{indent\_stack} tracks indentation levels across lines, emitting \texttt{INDENT} and \texttt{DEDENT} tokens to mark block boundaries.
+    \item \textbf{Keyword Detection}: Identifiers are first regex-matched, then checked against a keyword map (e.g., \texttt{if}, \texttt{def}, \texttt{while}, \texttt{return}, \texttt{print}) to produce the correct keyword token type.
+    \item \textbf{Line and Column Tracking}: Every token stores its \texttt{line} and \texttt{column} numbers for downstream error reporting.
+\end{itemize}
+
+\subsubsection{Token Types Implemented}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+\rowcolor{blue!10}
+\textbf{Category} & \textbf{Tokens} \\
+\hline
+Special & \texttt{EOF, NEWLINE, INDENT, DEDENT} \\
+\hline
+Literals & \texttt{NUMBER, STRING, IDENTIFIER} \\
+\hline
+Keywords & \texttt{DEF, IF, ELSE, WHILE, RETURN, PRINT} \\
+\hline
+Arithmetic & \texttt{PLUS, MINUS, MULTIPLY, DIVIDE} \\
+\hline
+Comparison & \texttt{EQ, NEQ, LT, GT, LTE, GTE} \\
+\hline
+Assignment & \texttt{ASSIGN} \\
+\hline
+Delimiters & \texttt{LPAREN, RPAREN, COLON, COMMA} \\
+\hline
+\end{tabular}
+\caption{Token types defined in \texttt{tokens.py}}
+\end{table}
+
+\subsection{Week 6: Syntax Parser (Recursive Descent)}
+
+\subsubsection{What It Does}
+
+The Parser (\texttt{src/compiler/parser.py}) takes the token stream from the Lexer and builds a hierarchical \textbf{Abstract Syntax Tree (AST)}, validating that the code conforms to the EBNF grammar.
+
+\subsubsection{Key Design Decisions}
+
+\begin{itemize}
+    \item \textbf{Recursive Descent Parsing}: A hand-written top-down parser is used, with one parsing function per grammar rule. This approach was chosen over parser generators (like ANTLR or PLY) to provide maximum control and academic rigor.
+    \item \textbf{Operator Precedence}: Arithmetic precedence (\texttt{*} before \texttt{+}) is naturally encoded in the grammar's production hierarchy: \texttt{expression} $\rightarrow$ \texttt{term} $\rightarrow$ \texttt{factor}.
+    \item \textbf{Unary Minus Support}: The \texttt{parse\_factor()} function was extended to handle the \texttt{-expr} pattern, producing a \texttt{UnaryOp} node.
+    \item \textbf{Visitor Pattern}: All AST nodes implement an \texttt{accept(visitor)} method to support future traversals (used in the semantic analyzer and context provider).
+\end{itemize}
+
+\subsubsection{AST Node Hierarchy (16 Node Types)}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+\rowcolor{blue!10}
+\textbf{Category} & \textbf{Node Class} & \textbf{Description} \\
+\hline
+Root & \texttt{Program} & Root node, contains all top-level statements \\
+\hline
+Container & \texttt{Block} & Indented sequence of statements \\
+\hline
+\multirow{7}{*}{Statements} & \texttt{Assignment} & \texttt{x = expr} \\
+ & \texttt{IfStatement} & \texttt{if cond: ... else: ...} \\
+ & \texttt{WhileStatement} & \texttt{while cond: ...} \\
+ & \texttt{FunctionDef} & \texttt{def name(params): ...} \\
+ & \texttt{ReturnStatement} & \texttt{return expr} \\
+ & \texttt{PrintStatement} & \texttt{print(expr)} \\
+ & \texttt{Statement} & Abstract base class \\
+\hline
+\multirow{6}{*}{Expressions} & \texttt{BinaryOp} & \texttt{a + b}, \texttt{x == y} \\
+ & \texttt{UnaryOp} & \texttt{-x} \\
+ & \texttt{Identifier} & Variable/function name reference \\
+ & \texttt{Literal} & Integer or string literal \\
+ & \texttt{FunctionCall} & \texttt{func(arg1, arg2)} \\
+ & \texttt{Expression} & Abstract base class \\
+\hline
+\multirow{1}{*}{Base} & \texttt{ASTNode} & Base for all nodes (line, column) \\
+\hline
+\end{tabular}
+\caption{Complete AST node hierarchy (16 types in \texttt{ast\_nodes.py})}
+\end{table}
+
+\subsection{Week 7: Semantic Analyzer}
+
+\subsubsection{What It Does}
+
+The Semantic Analyzer (\texttt{src/compiler/semantic\_analyzer.py}) traverses the AST and performs meaning-level validation that the parser cannot catch.
+
+\subsubsection{Key Design Decisions}
+
+\begin{itemize}
+    \item \textbf{Dictionary-Based Symbol Table}: Each \texttt{Scope} object is a dictionary mapping variable names to \texttt{Symbol} records. This provides O(1) average-case lookup and is straightforward to serialize.
+    \item \textbf{Scope Stack}: A \texttt{SymbolTable} manages a list of \texttt{Scope} objects. Function calls push a new scope; returning pops it. Lookup searches from innermost to outermost scope (shadowing semantics).
+    \item \textbf{Graceful Error Accumulation}: Errors are accumulated in a list rather than raising on first error, allowing the analyzer to report all errors in a single pass.
+\end{itemize}
+
+\subsubsection{Semantic Checks Implemented}
+
+\begin{table}[h!]
+\centering
+\begin{tabularx}{\textwidth}{|l|X|}
+\hline
+\rowcolor{blue!10}
+\textbf{Check} & \textbf{Description} \\
+\hline
+Undefined Variable & Error when a variable is used before assignment \\
+\hline
+Undefined Function & Error when a function is called before its \texttt{def} \\
+\hline
+Duplicate Definition & Error when a function/variable is redefined in the same scope \\
+\hline
+Duplicate Parameters & Error when a function parameter name appears twice \\
+\hline
+Type Mismatch Warning & Warning when arithmetic operands have incompatible types \\
+\hline
+Type Reassignment Warning & Warning when a variable's type changes on reassignment \\
+\hline
+Non-callable Call & Error when a non-function identifier is called as a function \\
+\hline
+Unary Minus Type & Warning when unary minus is applied to a non-integer \\
+\hline
+\end{tabularx}
+\caption{Semantic validation checks implemented}
+\end{table}
+
+\subsection{Week 8: Gemini API Integration \& Context Injection}
+
+\subsubsection{Context Provider (\texttt{context\_provider.py})}
+
+The \texttt{ContextProvider} class is the bridge between the compiler and the AI. It walks the compiler's data structures and converts them to structured natural language.
+
+\begin{lstlisting}[language=Python, caption=ContextProvider API]
+class ContextProvider:
+    @staticmethod
+    def serialize_ast(ast: Program) -> str:
+        """Convert the AST into a human-readable program structure summary."""
+
+    @staticmethod
+    def serialize_symbol_table(symbol_table: SymbolTable) -> str:
+        """Convert the scope stack + symbols into readable text."""
+
+    @staticmethod
+    def serialize_errors(errors, warnings) -> str:
+        """Format semantic errors/warnings for AI consumption."""
+
+    @staticmethod
+    def build_context(source_code, ast, analyzer) -> str:
+        """Main entry point: combine all above into one context string."""
+
+    @staticmethod
+    def build_error_context(source_code, error_type, error_message, ...) -> str:
+        """For lexer/parser errors that occur before the AST exists."""
+\end{lstlisting}
+
+\subsubsection{Enhanced Gemini Client (\texttt{gemini\_client.py})}
+
+\begin{lstlisting}[language=Python, caption=GeminiCompilerAgent Key Methods]
+class GeminiCompilerAgent:
+    def analyze_with_context(self, compiler_context: str) -> str:
+        """Send full compiler state (AST + Symbols + Errors) to Gemini."""
+
+    def explain_error(self, source_code, error_type, error_message,
+                      compiler_context=None) -> str:
+        """Ask Gemini to explain a specific compilation error."""
+
+    def _safe_send(self, prompt: str) -> str:
+        """Internal: handles rate limiting, timeouts, safety filters."""
+\end{lstlisting}
+
+\subsubsection{Bonus: Three-Address Code (TAC) Generator}
+
+As a bonus deliverable, \texttt{tac\_generator.py} implements an intermediate code generator that emits Three-Address Code (TAC) instructions from the AST. This is a standard compiler middle-end phase (between front-end analysis and back-end code generation). The TAC generator supports 21 operation codes including arithmetic operations, conditional jumps, function calls, and return statements.
+
+
+% ============================================================
+\section{Research and Academic References}
+% ============================================================
+
+\subsection{Primary Compiler Theory References}
+
+The following foundational textbooks and resources directly informed the implementation choices in this project:
+
+\begin{enumerate}
+    \item \textbf{Aho, Lam, Sethi, and Ullman --- ``Compilers: Principles, Techniques, and Tools'' (Dragon Book, 2nd Ed.)}
+    \begin{itemize}
+        \item \textit{Applied to}: Lexer design (Chapter 3 --- Lexical Analysis), regex-based tokenizers, symbol table construction, scope management
+        \item \textit{Key concepts used}: DFA-based scanning, symbol table organization, scope rules
+    \end{itemize}
+
+    \item \textbf{Robert Nystrom --- ``Crafting Interpreters''}
+    \begin{itemize}
+        \item \textit{Applied to}: Recursive descent parsing (Weeks 6--7), AST node design, visitor pattern implementation
+        \item \textit{Key concepts used}: Top-down parsing, operator precedence via grammar hierarchy, tree-walking interpreters
+    \end{itemize}
+
+    \item \textbf{Andrew Appel --- ``Modern Compiler Implementation in ML''}
+    \begin{itemize}
+        \item \textit{Applied to}: Symbol table design, semantic analysis rules, scope stack implementation (Week 7)
+        \item \textit{Key concepts used}: Environment-based scope stacks, type systems for dynamic languages
+    \end{itemize}
+\end{enumerate}
+
+\subsection{AI and Agentic System References}
+
+\begin{enumerate}
+    \item \textbf{Yao et al. --- ``ReAct: Synergizing Reasoning and Acting in Language Models'' (2022)}
+    \begin{itemize}
+        \item \textit{Applied to}: The Gemini system prompt instructs the agent to follow the ReAct (Reason + Act) pattern: first reason about the compiler context, then act (suggest a fix).
+        \item \textit{Key concepts used}: Chain-of-thought reasoning, interleaving reasoning and action steps
+    \end{itemize}
+
+    \item \textbf{Google --- Gemini API Documentation and Function Calling Guide}
+    \begin{itemize}
+        \item \textit{Applied to}: Gemini model configuration, system prompt injection, safety filter handling, model listing and fallback logic
+        \item \textit{Key concepts used}: \texttt{GenerativeModel} instantiation, \texttt{start\_chat()} session management, function calling definitions (planned for Week 9)
+    \end{itemize}
+
+    \item \textbf{DeepLearning.AI --- ``Prompt Engineering for Developers''}
+    \begin{itemize}
+        \item \textit{Applied to}: System prompt design (Week 8), instructing the model to ground responses in the EBNF grammar
+        \item \textit{Key concepts used}: Role assignment, chain-of-thought elicitation, structured output prompting
+    \end{itemize}
+
+    \item \textbf{NVIDIA Technical Blog --- ``Building LLM-Powered Agents''}
+    \begin{itemize}
+        \item \textit{Applied to}: Architecture design of the Compiler-Agent Bridge (Week 4 planning), JSON/text serialization of internal state for LLM consumption
+        \item \textit{Key concepts used}: Tool-use agents, context window management, stateful agent sessions
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Security References}
+
+\begin{enumerate}
+    \item \textbf{OWASP Top 10 for LLM Applications (2023)}
+    \begin{itemize}
+        \item \textit{Applied to}: Week 3 --- Software Requirements Specification security section; Week 11 (planned) --- Security Auditing Agent
+        \item \textit{Key risks addressed}: Prompt injection, insecure output handling, training data poisoning
+    \end{itemize}
+
+    \item \textbf{Python Security Best Practices}
+    \begin{itemize}
+        \item \textit{Applied to}: Detection of dangerous patterns (\texttt{eval}, \texttt{exec}, \texttt{\_\_import\_\_}) flagged by the Gemini system prompt
+        \item \textit{Key concepts used}: Static analysis security testing (SAST) principles
+    \end{itemize}
+\end{enumerate}
+
+
+% ============================================================
+\section{Gaps Identified and Solutions Implemented}
+% ============================================================
+
+\subsection{Gap 1: Static Error Messages with No Contextual Intelligence}
+
+\gap{Traditional compilers report errors as static one-liners (e.g., \texttt{SyntaxError: invalid syntax}). These messages lack root-cause analysis, grammar rule references, and suggested fixes.}
+
+\solution{The \texttt{ContextProvider} serializes the AST, Symbol Table, and diagnostics into a structured natural language context. This context is injected into the Gemini prompt, enabling the AI to provide grammar-grounded explanations that reference specific line numbers and EBNF rules.}
+
+\subsection{Gap 2: LLMs Cannot Reason About Internal Compiler State}
+
+\gap{Sending raw source code to an LLM gives it no access to the compiler's internal understanding of the program --- the variable types, scope boundaries, or the parsed tree structure.}
+
+\solution{The Context Provider converts the compiler's \textit{internal data structures} (AST nodes, Scope objects, Symbol records) into readable text. When Gemini receives ``\texttt{SYMBOL TABLE: Scope: global (level 1), factorial: type=function, defined at line 1}'', it can reason much more precisely than from source code alone.}
+
+\subsection{Gap 3: Non-Deterministic Testing of AI-Integrated Systems}
+
+\gap{Tests that make live API calls to Gemini are slow, expensive, and non-deterministic (Gemini's outputs vary run-to-run). This makes CI/CD integration and repeatable test suites impossible.}
+
+\solution{The Context Provider layer is fully decoupled from the Gemini API. All 27 Week 8 tests in \texttt{test\_week8\_context.py} test only the serialization logic (verifying the context string contains expected keywords, structure, and line numbers), with zero API calls. The optional API call is gated behind a \texttt{--api} flag in the demo scripts.}
+
+\subsection{Gap 4: Python's Significant Whitespace in Hand-Crafted Lexers}
+
+\gap{Python's indentation-based block structure is notoriously difficult to handle in a scanner because indentation is semantically significant --- a change in indent level marks the start or end of a block. Standard character-by-character scanners cannot handle this without explicit state management.}
+
+\solution{An \texttt{indent\_stack} (a list of integer indent levels) is maintained across lines. When a new line's indent level exceeds the top of the stack, an \texttt{INDENT} token is emitted; when it decreases, one or more \texttt{DEDENT} tokens are emitted to close all affected blocks.}
+
+\subsection{Gap 5: Backward Compatibility During Iterative Enhancement}
+
+\gap{The Gemini client was first implemented in Week 2 as a simple wrapper. Week 8 required significant enhancement (system prompts, context-aware methods, secure error handling), risking breaking existing demos and tests.}
+
+\solution{New methods (\texttt{analyze\_with\_context()}, \texttt{explain\_error()}) were added alongside the existing \texttt{get\_assistance()} method, which was kept unchanged. The internal \texttt{\_safe\_send()} helper centralizes all error handling, used by all methods without duplicating logic.}
+
+\subsection{Gap 6: AST-to-Text Fidelity Loss}
+
+\gap{Converting a recursive tree structure to text risks losing structural information (nesting, node types, line positions) that the AI needs to reason accurately.}
+
+\solution{The AST serializer uses hierarchical indentation with per-node-type description methods. The output explicitly includes node type labels, parameter names, line numbers, and nesting level, ensuring the AI receives a faithful structural overview of the program.}
+
+
+% ============================================================
+\section{Testing Strategy and Results}
+% ============================================================
+
+\subsection{Test Suite Structure}
+
+\begin{table}[h!]
+\centering
+\begin{tabularx}{\textwidth}{|l|c|c|X|}
+\hline
+\rowcolor{blue!10}
+\textbf{Test File} & \textbf{Tests} & \textbf{Week} & \textbf{Coverage} \\
+\hline
+\texttt{test\_week5\_lexer.py} & 13 & 5 & Token types, keywords, operators, indentation, strings, errors \\
+\hline
+\texttt{test\_week6\_parser.py} & 27 & 6 & Assignments, if/else, while, function def, return, print, expressions \\
+\hline
+\texttt{test\_week7\_semantic.py} & 16 & 7 & Undefined vars, duplicate defs, type checks, scope management \\
+\hline
+\texttt{test\_week8\_context.py} & 27 & 8 & AST serialization, symbol table text, error formatting, full pipeline \\
+\hline
+\texttt{test\_week8\_tac.py} & 39 & 8 (Bonus) & TAC generation for all statement types, 21 operation codes \\
+\hline
+\texttt{test\_integration\_weeks5\_7.py} & 6 & 5--7 & Full pipeline (Lexer $\rightarrow$ Parser $\rightarrow$ Semantic) integration \\
+\hline
+\textbf{Grand Total} & \textbf{128} & \textbf{5--8} & \textbf{All Passing} \\
+\hline
+\end{tabularx}
+\caption{Complete test suite --- 128 tests, all passing as of Week 8}
+\end{table}
+
+\subsection{Testing Principles}
+
+\begin{itemize}
+    \item \textbf{Deterministic Only}: AI API calls are excluded from all automated tests. The Context Provider test suite verifies serialization outputs without requiring Gemini availability.
+    \item \textbf{Isolated Unit Tests}: Each compiler stage is tested independently before integration tests verify the end-to-end pipeline.
+    \item \textbf{Error Case Coverage}: Tests explicitly verify that the system correctly detects and reports errors (not just valid code).
+    \item \textbf{Run Command}: \texttt{python -m pytest tests/ -v} (run from project root)
+\end{itemize}
+
+\subsection{Demonstration Scripts}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+\rowcolor{blue!10}
+\textbf{Script} & \textbf{What It Demonstrates} \\
+\hline
+\texttt{demo\_week5\_lexer.py} & Tokenization of sample Mini-Python code \\
+\hline
+\texttt{demo\_week6\_parser.py} & AST construction and pretty-print output \\
+\hline
+\texttt{demo\_week7\_semantic.py} & Symbol table population and error detection \\
+\hline
+\texttt{demo\_week8\_ai.py} & Context Provider + (optional) live Gemini call (\texttt{--api} flag) \\
+\hline
+\texttt{demo\_week8\_tac.py} & Three-Address Code generation from source \\
+\hline
+\end{tabular}
+\caption{Demo scripts for each project phase}
+\end{table}
+
+
+% ============================================================
+\section{Security Considerations}
+% ============================================================
+
+\subsection{API Key Security}
+
+\begin{itemize}
+    \item The \texttt{GEMINI\_API\_KEY} is stored exclusively in the \texttt{.env} file (excluded from version control via \texttt{.gitignore}).
+    \item The \texttt{python-dotenv} library loads the key at runtime; it is \textbf{never} hardcoded in source files.
+    \item The Gemini client trims the key and logs only the first 5 and last 4 characters for verification without exposing the full key in logs.
+\end{itemize}
+
+\subsection{AI Safety Filter Handling}
+
+The \texttt{\_safe\_send()} method explicitly catches \texttt{BlockedPromptException}, returning a user-friendly message when safety filters are triggered rather than crashing the application.
+
+\subsection{Security Auditing (In System Prompt)}
+
+The Gemini system prompt instructs the AI agent to flag code patterns that are syntactically valid but security-dangerous:
+\begin{itemize}
+    \item Use of \texttt{eval()}, \texttt{exec()}, or \texttt{\_\_import\_\_()}
+    \item Untrusted input being passed into sensitive sinks
+    \item Insecure default patterns
+\end{itemize}
+
+\subsection{Planned: Security Agent (Week 11)}
+
+A dedicated Security Auditing Agent will perform deeper static analysis (SAST) on the AST, checking for ``Logic Bombs'', ``Prompt Injection'' within code comments, and enforcing security policies at compile time. This is aligned with the OWASP ``Shift-Left'' security methodology.
+
+
+% ============================================================
+\section{Project Timeline and Status}
+% ============================================================
+
+\subsection{Completed Phases (Weeks 1--8)}
+
+\begin{table}[h!]
+\centering
+\begin{tabularx}{\textwidth}{|c|l|X|c|}
+\hline
+\rowcolor{blue!10}
+\textbf{Week} & \textbf{Phase} & \textbf{Key Deliverable} & \textbf{Status} \\
+\hline
+1 & Problem Definition & EBNF grammar, project structure & \statusdone{DONE} \\
+\hline
+2 & API Design & Gemini client, prompt architecture & \statusdone{DONE} \\
+\hline
+3 & Requirements & SRS document, threat model & \statusdone{DONE} \\
+\hline
+4 & Architecture & Component blueprint, module interaction maps & \statusdone{DONE} \\
+\hline
+5 & Lexer & Regex tokenizer, indentation handling (13 tests) & \statusdone{DONE} \\
+\hline
+6 & Parser & Recursive descent, AST (27 tests) & \statusdone{DONE} \\
+\hline
+7 & Semantic Analysis & Symbol table, type checking (16 tests) & \statusdone{DONE} \\
+\hline
+8 & AI Bridge & Context Provider + enhanced Gemini client (27 tests + 39 bonus TAC tests) & \statusdone{DONE} \\
+\hline
+\end{tabularx}
+\caption{Weeks 1--8 status (all complete)}
+\end{table}
+
+\subsection{Planned Phases (Weeks 9--16)}
+
+\begin{table}[h!]
+\centering
+\begin{tabularx}{\textwidth}{|c|l|X|}
+\hline
+\rowcolor{yellow!15}
+\textbf{Week} & \textbf{Phase} & \textbf{Planned Deliverable} \\
+\hline
+9 & Agentic Tool-Use & Gemini Function Calling --- \texttt{check\_scope()}, \texttt{reparse\_code()} \\
+\hline
+10 & Conversational UI & Chatbot CLI/Web with follow-up question support \\
+\hline
+11 & Security Agent & AST-level security auditing, logic bomb detection \\
+\hline
+12 & Benchmarking & Latency measurement, accuracy vs standard error messages \\
+\hline
+13 & Explainability (XAI) & Reasoning log showing which AST node led to AI decision \\
+\hline
+14 & Integration Testing & End-to-end: AI-fixed code re-parsed through the compiler \\
+\hline
+15 & Documentation & Final report, architecture diagrams, prompt templates \\
+\hline
+16 & Demo \& Submission & Live demo recording, GitHub submission \\
+\hline
+\end{tabularx}
+\caption{Weeks 9--16 planned phases}
+\end{table}
+
+
+% ============================================================
+\section{Key Achievements and Innovation}
+% ============================================================
+
+\subsection{Technical Innovations}
+
+\begin{enumerate}
+    \item \textbf{Grammar-Grounded AI Reasoning}: By injecting the EBNF grammar into the system prompt, Gemini can reference specific grammar rules when explaining errors --- a level of precision not achievable with generic LLM prompts.
+
+    \item \textbf{Compiler-State Context Injection}: The Context Provider pattern (serializing AST + Symbol Table + Errors as natural language) is a novel bridge between formal compiler theory and modern LLM prompting, producing a form of ``Retrieval-Augmented Generation'' from the compiler's own output.
+
+    \item \textbf{From-Scratch Compiler}: Building the lexer, parser, and semantic analyzer without compiler-generators ensures the system has deep, controllable access to its internal state --- a requirement for meaningful AI integration.
+
+    \item \textbf{Deterministic AI Testing}: Decoupling the Context Provider from the API layer allows the serialization logic to be fully unit-tested without live API calls, making the test suite reliable and CI/CD-ready.
+
+    \item \textbf{Bonus Intermediate Code Generation}: The TAC generator provides an early implementation of a compiler middle-end, laying the groundwork for future optimizations and machine code generation.
+\end{enumerate}
+
+\subsection{Summary of Deliverables as of Week 8}
+
+\begin{tcolorbox}[colback=green!5!white, colframe=green!50!black, title={Final Deliverables Status}]
+\begin{itemize}
+    \item[\checkmark] \statusdone{COMPLETE} \textbf{EBNF Grammar} for Mini-Python (\texttt{grammar/mini\_python.ebnf})
+    \item[\checkmark] \statusdone{COMPLETE} \textbf{Lexer} with indentation handling (\texttt{src/compiler/lexer.py})
+    \item[\checkmark] \statusdone{COMPLETE} \textbf{Parser} with 16-node AST hierarchy (\texttt{src/compiler/parser.py}, \texttt{ast\_nodes.py})
+    \item[\checkmark] \statusdone{COMPLETE} \textbf{Semantic Analyzer} with scope stack (\texttt{src/compiler/semantic\_analyzer.py})
+    \item[\checkmark] \statusdone{COMPLETE} \textbf{Context Provider} (compiler $\to$ AI bridge) (\texttt{src/orchestrator/context\_provider.py})
+    \item[\checkmark] \statusdone{COMPLETE} \textbf{Gemini Client} with system prompt + secure API (\texttt{src/orchestrator/gemini\_client.py})
+    \item[\checkmark] \statusbonus{BONUS} \textbf{TAC Generator} (\texttt{src/compiler/tac\_generator.py})
+    \item[\checkmark] \statusdone{COMPLETE} \textbf{128 Tests Passing} across Weeks 5--8
+    \item[\checkmark] \statusdone{COMPLETE} \textbf{5 Demo Scripts} for each project phase
+    \item[\checkmark] \statusdone{COMPLETE} \textbf{8 Weekly Reports} + SRS + Architecture documents (all in LaTeX)
+\end{itemize}
+\end{tcolorbox}
+
+
+% ============================================================
+\section{Conclusion}
+% ============================================================
+
+Project 83 demonstrates that a custom-built compiler front-end and a modern large language model can be integrated in a principled, structured way to create developer tools that are more intelligent, more explainable, and more secure than traditional compilers.
+
+The key architectural insight --- that the compiler's internal state (\textbf{AST, Symbol Table, Diagnostics}) can be serialized into natural language and injected as context into an LLM prompt --- provides a powerful pattern applicable beyond this project: any structured reasoning system can be made AI-explainable by building a ``context bridge'' that translates its internal representations into human-readable text that an LLM can reason about.
+
+With 128 tests passing and the complete compiler-to-AI pipeline operational, the project is well-positioned to complete the agentic tool-use, conversational interface, and security auditing phases in Weeks 9--16, delivering a full-featured Conversational Agentic AI Compiler Assistant.
+
+\vspace{1cm}
+\noindent\textbf{Prepared by:} Project 83 Team \\
+\textbf{Document Date:} March 2026 \\
+\textbf{Current Phase:} Week 8 Complete \\
+\textbf{Next Milestone:} Week 9 --- Agentic Tool-Use (Function Calling)
+
+\end{document}

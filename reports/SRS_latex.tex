@@ -1,0 +1,931 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage[table]{xcolor}
+\usepackage{fancyhdr}
+\usepackage{tabularx}
+\usepackage{graphicx}
+\usepackage{lastpage}
+\usepackage{hyperref}
+\usepackage{float}
+
+% Page Setup
+\geometry{top=1in, bottom=1in, left=0.8in, right=0.8in}
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small Project 83: Agentic AI Compiler}
+\rhead{\small SRS Document}
+\cfoot{\thepage\ of \pageref{LastPage}}
+
+% Formatting
+\titleformat{\section}{\Large\bfseries\color{blue!70!black}}{\thesection.}{1em}{}[\titlerule]
+\titleformat{\subsection}{\large\bfseries\color{blue!50!black}}{\thesubsection}{1em}{}
+
+% Custom commands
+\newcommand{\priority}[1]{\colorbox{red!20}{\textbf{#1}}}
+\newcommand{\prioritymed}[1]{\colorbox{yellow!20}{\textbf{#1}}}
+\newcommand{\prioritylow}[1]{\colorbox{green!20}{\textbf{#1}}}
+
+\begin{document}
+
+\begin{center}
+    {\Huge \textbf{Software Requirements}} \\
+    {\Huge \textbf{Specification (SRS)}} \\
+    \vspace{5mm}
+    {\LARGE \textbf{Project 83}} \\
+    {\large Conversational Agentic AI Compiler Assistant} \\
+    {\large for Mini-Python Language} \\
+    \vspace{5mm}
+    \textbf{Version:} 1.0 \\
+    \textbf{Date:} January 2026 \\
+    \textbf{Status:} APPROVED
+\end{center}
+
+\vspace{5mm}
+
+\tableofcontents
+\clearpage
+
+\section{Introduction}
+
+\subsection{1.1 Purpose}
+
+This Software Requirements Specification (SRS) document provides a complete description of all functionalities, constraints, and interfaces for the \textbf{Agentic AI Compiler Assistant} system. It is intended for:
+
+\begin{itemize}
+    \item \textbf{Developers:} To guide implementation of system components
+    \item \textbf{Testers:} To create comprehensive test plans
+    \item \textbf{Stakeholders:} To understand system capabilities and limitations
+    \item \textbf{Academic Reviewers:} To evaluate project scope and complexity
+\end{itemize}
+
+\subsection{1.2 Scope}
+
+\textbf{Product Name:} Agentic AI Compiler Assistant (Project 83)
+
+\textbf{Product Description:} An intelligent compiler for the Mini-Python programming language that combines traditional compilation phases (lexical analysis, syntax parsing, semantic analysis) with AI-powered assistance to provide contextual error explanations, correction suggestions, and security auditing.
+
+\textbf{Benefits:}
+\begin{itemize}
+    \item Reduces debugging time through intelligent error explanations
+    \item Educates users on compiler theory and language grammar
+    \item Identifies security vulnerabilities proactively
+    \item Provides interactive learning environment for compiler concepts
+\end{itemize}
+
+\textbf{Goals:}
+\begin{enumerate}
+    \item Create a working compiler front-end for Mini-Python
+    \item Integrate Google Gemini AI for intelligent assistance
+    \item Achieve >95\% test coverage on all components
+    \item Provide both CLI and Web UI interfaces
+    \item Complete implementation within 16 weeks
+\end{enumerate}
+
+\subsection{1.3 Definitions, Acronyms, and Abbreviations}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{|l|X|}
+\hline
+\rowcolor{blue!10}
+\textbf{Term} & \textbf{Definition} \\
+\hline
+AI & Artificial Intelligence \\
+\hline
+API & Application Programming Interface \\
+\hline
+AST & Abstract Syntax Tree - hierarchical representation of source code \\
+\hline
+CLI & Command Line Interface \\
+\hline
+EBNF & Extended Backus-Naur Form - notation for grammar specification \\
+\hline
+EOF & End of File \\
+\hline
+Gemini & Google's Large Language Model API \\
+\hline
+Lexer & Lexical Analyzer - converts source code to tokens \\
+\hline
+Mini-Python & Subset of Python language used in this project \\
+\hline
+Parser & Syntax Analyzer - converts tokens to AST \\
+\hline
+SRS & Software Requirements Specification \\
+\hline
+Token & Atomic unit of source code (e.g., keyword, operator) \\
+\hline
+UI & User Interface \\
+\hline
+\end{tabularx}
+\caption{Terminology}
+\end{table}
+
+\subsection{1.4 References}
+
+\begin{enumerate}
+    \item Python Language Reference: \url{https://docs.python.org/3/reference/}
+    \item Google Gemini API Documentation: \url{https://ai.google.dev/docs}
+    \item Compiler Design Principles (Aho, Sethi, Ullman)
+    \item Mini-Python EBNF Grammar (Project Documentation)
+\end{enumerate}
+
+\subsection{1.5 Overview}
+
+This SRS is organized into the following sections:
+\begin{itemize}
+    \item \textbf{Section 2:} Overall product description and context
+    \item \textbf{Section 3:} Detailed functional requirements
+    \item \textbf{Section 4:} External interface requirements
+    \item \textbf{Section 5:} Non-functional requirements
+    \item \textbf{Section 6:} System constraints and assumptions
+\end{itemize}
+
+\clearpage
+
+\section{Overall Description}
+
+\subsection{2.1 Product Perspective}
+
+The Agentic AI Compiler Assistant is a \textbf{standalone system} with external dependencies on:
+\begin{itemize}
+    \item \textbf{Google Gemini API:} Cloud-based AI service
+    \item \textbf{Python Runtime:} Execution environment
+    \item \textbf{Operating System:} Windows/Linux/macOS
+\end{itemize}
+
+\textbf{System Context Diagram:}
+\begin{center}
+\begin{tikzpicture}[node distance=2cm, auto]
+    \tikzstyle{block} = [rectangle, draw, fill=blue!20, text width=5em, text centered, minimum height=3em]
+    \tikzstyle{cloud} = [draw, ellipse, fill=green!20, minimum height=2em]
+    
+    \node [block] (system) {Agentic AI Compiler};
+    \node [cloud, left of=system, node distance=4cm] (user) {User};
+    \node [cloud, right of=system, node distance=4cm] (gemini) {Gemini API};
+    \node [cloud, below of=system] (files) {Source Files};
+    
+    \draw [->] (user) -- node {Code Input} (system);
+    \draw [->] (system) -- node {Results} (user);
+    \draw [->] (system) -- node {AI Query} (gemini);
+    \draw [->] (gemini) -- node {Response} (system);
+    \draw [->] (files) -- node {Read} (system);
+\end{tikzpicture}
+\end{center}
+
+\subsection{2.2 Product Functions}
+
+\textbf{Core Functions:}
+\begin{enumerate}
+    \item \textbf{Lexical Analysis:} Convert source code to token stream
+    \item \textbf{Syntax Parsing:} Build Abstract Syntax Tree from tokens
+    \item \textbf{Semantic Analysis:} Validate variable scopes and types
+    \item \textbf{Error Detection:} Identify compilation errors at all phases
+    \item \textbf{AI Assistance:} Generate intelligent error explanations
+    \item \textbf{Security Auditing:} Flag insecure coding patterns
+    \item \textbf{Interactive Debugging:} Multi-turn conversation for fixes
+    \item \textbf{Code Visualization:} Display AST structure graphically
+\end{enumerate}
+
+\subsection{2.3 User Classes and Characteristics}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{|l|X|X|}
+\hline
+\rowcolor{blue!10}
+\textbf{User Class} & \textbf{Characteristics} & \textbf{Technical Expertise} \\
+\hline
+Students & Learning compiler design & Beginner to Intermediate \\
+\hline
+Educators & Teaching compiler theory & Advanced \\
+\hline
+Developers & Prototyping Mini-Python code & Intermediate \\
+\hline
+Researchers & Studying AI in compilers & Advanced \\
+\hline
+\end{tabularx}
+\caption{User Classes}
+\end{table}
+
+\subsection{2.4 Operating Environment}
+
+\textbf{Hardware:}
+\begin{itemize}
+    \item Processor: x86-64 or ARM64
+    \item RAM: Minimum 4GB, Recommended 8GB
+    \item Storage: 500MB free space
+    \item Network: Internet connection for AI features
+\end{itemize}
+
+\textbf{Software:}
+\begin{itemize}
+    \item OS: Windows 10+, macOS 11+, Linux (Ubuntu 20.04+)
+    \item Python: Version 3.10 or higher
+    \item Browser: Chrome/Firefox (for Web UI)
+\end{itemize}
+
+\subsection{2.5 Design and Implementation Constraints}
+
+\begin{itemize}
+    \item \textbf{Language Constraint:} Must be implemented in Python 3.10+
+    \item \textbf{No External Parsers:} Cannot use ANTLR, PLY, or similar tools
+    \item \textbf{AI Dependency:} Requires active Gemini API key
+    \item \textbf{Grammar Limitation:} Restricted to Mini-Python subset
+    \item \textbf{API Rate Limits:} Subject to Gemini free tier quotas
+\end{itemize}
+
+\subsection{2.6 Assumptions and Dependencies}
+
+\textbf{Assumptions:}
+\begin{itemize}
+    \item Users have basic understanding of Python syntax
+    \item Users can obtain Google Gemini API key
+    \item Internet connectivity is available for AI features
+    \item Source code files are UTF-8 encoded
+\end{itemize}
+
+\textbf{Dependencies:}
+\begin{itemize}
+    \item \texttt{google-generativeai} Python package
+    \item \texttt{python-dotenv} for configuration
+    \item \texttt{pytest} for testing
+    \item \texttt{streamlit} for Web UI (optional)
+\end{itemize}
+
+\clearpage
+
+\section{Functional Requirements}
+
+\subsection{3.1 Lexical Analysis Module}
+
+\textbf{FR1.1: Token Generation} \priority{HIGH}
+
+\textbf{Description:} The system shall convert Mini-Python source code into a sequence of tokens.
+
+\textbf{Input:} String containing Mini-Python source code
+
+\textbf{Output:} List of Token objects, each containing:
+\begin{itemize}
+    \item Token type (e.g., KEYWORD, IDENTIFIER, OPERATOR)
+    \item Token value (e.g., "def", "x", "+")
+    \item Line number
+    \item Column number
+\end{itemize}
+
+\textbf{Processing Rules:}
+\begin{enumerate}
+    \item Recognize all keywords: def, if, elif, else, while, for, return, in, and, or, not, True, False
+    \item Identify operators: +, -, *, /, \%, ==, !=, <, >, <=, >=
+    \item Parse literals: integers, strings (single/double quotes)
+    \item Extract identifiers: alphanumeric + underscore, starting with letter
+    \item Handle delimiters: parentheses, colon, comma
+\end{enumerate}
+
+\vspace{3mm}
+\textbf{FR1.2: Indentation Handling} \priority{HIGH}
+
+\textbf{Description:} The system shall manage Python-style significant whitespace by emitting INDENT and DEDENT tokens.
+
+\textbf{Processing Rules:}
+\begin{enumerate}
+    \item Maintain indentation stack initialized with [0]
+    \item Emit INDENT when indentation increases
+    \item Emit DEDENT(s) when indentation decreases
+    \item Raise IndentationError for misaligned dedents
+    \item Ignore blank lines and comments for indentation calculation
+\end{enumerate}
+
+\vspace{3mm}
+\textbf{FR1.3: Lexical Error Detection} \priority{HIGH}
+
+\textbf{Description:} The system shall detect and report lexical errors.
+
+\textbf{Error Types:}
+\begin{itemize}
+    \item Invalid characters (e.g., \texttt{@}, \texttt{\$})
+    \item Unterminated string literals
+    \item Mixed tabs and spaces in indentation
+    \item Invalid numeric literals
+\end{itemize}
+
+\textbf{Output:} Error message with line, column, and description
+
+\subsection{3.2 Syntax Parsing Module}
+
+\textbf{FR2.1: AST Construction} \priority{HIGH}
+
+\textbf{Description:} The system shall build an Abstract Syntax Tree from the token stream according to Mini-Python grammar.
+
+\textbf{Input:} Token list from Lexer
+
+\textbf{Output:} AST root node representing program structure
+
+\textbf{AST Node Types:}
+\begin{itemize}
+    \item ProgramNode
+    \item FunctionDefNode
+    \item IfStatementNode
+    \item WhileStatementNode
+    \item AssignmentNode
+    \item BinaryOpNode
+    \item VariableNode
+    \item LiteralNode
+\end{itemize}
+
+\vspace{3mm}
+\textbf{FR2.2: Syntax Error Detection} \priority{HIGH}
+
+\textbf{Description:} The system shall detect violations of Mini-Python grammar.
+
+\textbf{Error Types:}
+\begin{itemize}
+    \item Missing colons after function/if/while headers
+    \item Mismatched parentheses
+    \item Invalid expression syntax
+    \item Unexpected tokens
+\end{itemize}
+
+\vspace{3mm}
+\textbf{FR2.3: Operator Precedence} \priority{MEDIUM}
+
+\textbf{Description:} The system shall enforce correct operator precedence and associativity.
+
+\textbf{Precedence Order (High to Low):}
+\begin{enumerate}
+    \item Parentheses: \texttt{( )}
+    \item Multiplication, Division, Modulo: \texttt{*}, \texttt{/}, \texttt{\%}
+    \item Addition, Subtraction: \texttt{+}, \texttt{-}
+    \item Comparison: \texttt{<}, \texttt{>}, \texttt{<=}, \texttt{>=}, \texttt{==}, \texttt{!=}
+    \item Logical: \texttt{and}, \texttt{or}, \texttt{not}
+\end{enumerate}
+
+\subsection{3.3 Semantic Analysis Module}
+
+\textbf{FR3.1: Symbol Table Management} \priority{HIGH}
+
+\textbf{Description:} The system shall maintain a symbol table to track variable and function declarations.
+
+\textbf{Functionality:}
+\begin{itemize}
+    \item Record variable declarations with scope
+    \item Track function definitions and parameters
+    \item Detect undeclared variable usage
+    \item Identify variable redeclaration errors
+\end{itemize}
+
+\vspace{3mm}
+\textbf{FR3.2: Scope Analysis} \priority{HIGH}
+
+\textbf{Description:} The system shall enforce scope rules for variables and functions.
+
+\textbf{Scope Rules:}
+\begin{itemize}
+    \item Global scope: Module-level definitions
+    \item Local scope: Function parameters and local variables
+    \item Nested scope: Variables from outer functions
+\end{itemize}
+
+\vspace{3mm}
+\textbf{FR3.3: Type Checking} \priority{MEDIUM}
+
+\textbf{Description:} The system shall perform basic type validation.
+
+\textbf{Type Checks:}
+\begin{itemize}
+    \item Integer operations require integer operands
+    \item Comparison operators require compatible types
+    \item Function calls match declared parameters
+\end{itemize}
+
+\subsection{3.4 AI Assistance Module}
+
+\textbf{FR4.1: Error Context Generation} \priority{HIGH}
+
+\textbf{Description:} Upon compilation error, the system shall prepare detailed context for AI analysis.
+
+\textbf{Context Contents:}
+\begin{itemize}
+    \item Error type and message
+    \item Problematic code snippet (±5 lines)
+    \item Token stream around error location
+    \item Current AST structure (if available)
+    \item Relevant grammar rules from EBNF
+\end{itemize}
+
+\vspace{3mm}
+\textbf{FR4.2: AI Query Execution} \priority{HIGH}
+
+\textbf{Description:} The system shall send error context to Gemini API and retrieve response.
+
+\textbf{Processing:}
+\begin{enumerate}
+    \item Format error context as natural language prompt
+    \item Inject EBNF grammar as system instruction
+    \item Call Gemini API with configured model
+    \item Parse AI response for explanation and suggestions
+\end{enumerate}
+
+\textbf{API Requirements:}
+\begin{itemize}
+    \item Use system instructions for "Compiler Assistant" persona
+    \item Configure temperature=0.3 for consistent responses
+    \item Handle API errors gracefully (timeout, rate limit)
+\end{itemize}
+
+\vspace{3mm}
+\textbf{FR4.3: Response Formatting} \priority{MEDIUM}
+
+\textbf{Description:} The system shall present AI responses in user-friendly format.
+
+\textbf{Response Structure:}
+\begin{itemize}
+    \item \textbf{Error Explanation:} What went wrong and why
+    \item \textbf{Grammar Reference:} Relevant EBNF rule
+    \item \textbf{Suggested Fix:} Corrected code snippet
+    \item \textbf{Additional Tips:} Best practices (optional)
+\end{itemize}
+
+\vspace{3mm}
+\textbf{FR4.4: Conversational Loop} \priority{MEDIUM}
+
+\textbf{Description:} The system shall support multi-turn dialogue for iterative debugging.
+
+\textbf{Functionality:}
+\begin{itemize}
+    \item Maintain conversation history
+    \item Allow user to ask follow-up questions
+    \item Reference previous error context in new responses
+    \item Option to reset conversation
+\end{itemize}
+
+\subsection{3.5 Security Auditing Module}
+
+\textbf{FR5.1: Pattern Detection} \priority{HIGH}
+
+\textbf{Description:} The system shall identify insecure coding patterns in Mini-Python code.
+
+\textbf{Dangerous Patterns:}
+\begin{itemize}
+    \item Use of \texttt{eval()} function
+    \item Use of \texttt{exec()} function
+    \item String concatenation in loops (performance issue)
+    \item Unused variables (code smell)
+\end{itemize}
+
+\vspace{3mm}
+\textbf{FR5.2: Security Warnings} \priority{MEDIUM}
+
+\textbf{Description:} The system shall generate warnings for detected security risks.
+
+\textbf{Warning Format:}
+\begin{itemize}
+    \item Severity level (HIGH, MEDIUM, LOW)
+    \item Description of risk
+    \item Secure alternative suggestion
+    \item Reference to security best practices
+\end{itemize}
+
+\subsection{3.6 User Interface Module}
+
+\textbf{FR6.1: Command Line Interface} \priority{HIGH}
+
+\textbf{Description:} The system shall provide a CLI for code compilation and interactive debugging.
+
+\textbf{Commands:}
+\begin{itemize}
+    \item \texttt{compile <filename>}: Compile source file
+    \item \texttt{debug}: Enter interactive debugging mode
+    \item \texttt{help}: Display usage instructions
+    \item \texttt{exit}: Quit application
+\end{itemize}
+
+\vspace{3mm}
+\textbf{FR6.2: Web User Interface} \prioritymed{MEDIUM}
+
+\textbf{Description:} The system shall provide a Streamlit-based web interface.
+
+\textbf{UI Components:}
+\begin{itemize}
+    \item Left panel: Code editor with syntax highlighting
+    \item Right panel: AI chatbot interface
+    \item Bottom panel: AST visualization
+    \item Toolbar: Compile, Clear, Download buttons
+\end{itemize}
+
+\vspace{3mm}
+\textbf{FR6.3: AST Visualization} \prioritylow{LOW}
+
+\textbf{Description:} The system shall display Abstract Syntax Tree graphically.
+
+\textbf{Visualization Features:}
+\begin{itemize}
+    \item Tree structure with expandable nodes
+    \item Node details on hover/click
+    \item Export as PNG/SVG
+\end{itemize}
+
+\clearpage
+
+\section{External Interface Requirements}
+
+\subsection{4.1 User Interfaces}
+
+\textbf{UI1: Command Line Interface}
+\begin{itemize}
+    \item Standard terminal/console application
+    \item Text-based input and output
+    \item Color-coded error messages (red) and success (green)
+    \item Supports ANSI escape codes for formatting
+\end{itemize}
+
+\textbf{UI2: Web User Interface}
+\begin{itemize}
+    \item Browser-based interface using Streamlit
+    \item Responsive design (desktop and tablet)
+    \item Minimum screen resolution: 1280x720
+    \item Dark mode support
+\end{itemize}
+
+\subsection{4.2 Hardware Interfaces}
+
+No direct hardware interfaces required. System uses standard OS I/O for:
+\begin{itemize}
+    \item Keyboard input
+    \item Display output
+    \item File system access
+\end{itemize}
+
+\subsection{4.3 Software Interfaces}
+
+\textbf{SI1: Google Gemini API}
+\begin{itemize}
+    \item Interface: RESTful HTTP API
+    \item Protocol: HTTPS
+    \item Authentication: API Key in request headers
+    \item Data Format: JSON
+    \item Models: gemini-1.5-pro, gemini-1.5-flash, or later
+\end{itemize}
+
+\textbf{SI2: Python Standard Library}
+\begin{itemize}
+    \item \texttt{re} - Regular expression operations
+    \item \texttt{os} - Operating system interface
+    \item \texttt{sys} - System-specific parameters
+    \item \texttt{enum} - Enumeration support
+    \item \texttt{typing} - Type hints
+\end{itemize}
+
+\textbf{SI3: Third-Party Libraries}
+\begin{itemize}
+    \item \texttt{google-generativeai} - Gemini SDK
+    \item \texttt{python-dotenv} - Environment variables
+    \item \texttt{pytest} - Testing framework
+    \item \texttt{streamlit} - Web UI framework
+\end{itemize}
+
+\subsection{4.4 Communication Interfaces}
+
+\textbf{Network Communication:}
+\begin{itemize}
+    \item Protocol: HTTPS (TLS 1.2+)
+    \item Port: 443 (standard HTTPS)
+    \item Endpoint: \texttt{generativelanguage.googleapis.com}
+    \item Data: JSON payloads
+\end{itemize}
+
+\textbf{File I/O:}
+\begin{itemize}
+    \item Input: \texttt{.py} files (UTF-8 encoding)
+    \item Output: Console logs, JSON reports
+    \item Configuration: \texttt{.env} files
+\end{itemize}
+
+\clearpage
+
+\section{Non-Functional Requirements}
+
+\subsection{5.1 Performance Requirements}
+
+\textbf{NFR1.1: Compilation Speed} \priority{HIGH}
+
+\begin{itemize}
+    \item Lexer: Process at least 1,000 lines/second
+    \item Parser: Build AST in <200ms for typical programs (<200 lines)
+    \item Semantic Analysis: Complete in <100ms
+    \item Total local processing: <500ms for 200-line program
+\end{itemize}
+
+\textbf{NFR1.2: AI Response Time} \prioritymed{MEDIUM}
+
+\begin{itemize}
+    \item Gemini API call: <3 seconds (90th percentile)
+    \item Total error-to-suggestion latency: <5 seconds
+    \item Timeout handling: 10 seconds maximum wait
+\end{itemize}
+
+\textbf{NFR1.3: Memory Usage} \prioritylow{LOW}
+
+\begin{itemize}
+    \item Token storage: <100 bytes per token
+    \item AST nodes: <200 bytes per node
+    \item Total memory for 500-line program: <5 MB
+\end{itemize}
+
+\subsection{5.2 Safety Requirements}
+
+\textbf{NFR2.1: API Key Security} \priority{HIGH}
+
+\begin{itemize}
+    \item API keys stored in \texttt{.env} file (not version controlled)
+    \item Keys loaded via \texttt{python-dotenv} at runtime
+    \item No hardcoding of credentials in source code
+    \item Clear error message if key is missing/invalid
+\end{itemize}
+
+\textbf{NFR2.2: Error Recovery} \prioritymed{MEDIUM}
+
+\begin{itemize}
+    \item System shall not crash on malformed input
+    \item Graceful handling of API failures (timeout, network error)
+    \item Comprehensive exception handling throughout
+    \item User-friendly error messages (no stack traces to end-users)
+\end{itemize}
+
+\subsection{5.3 Security Requirements}
+
+\textbf{NFR3.1: Input Validation} \priority{HIGH}
+
+\begin{itemize}
+    \item Sanitize file paths to prevent directory traversal
+    \item Limit file size to 10 MB maximum
+    \item Validate file encoding (UTF-8 only)
+    \item Reject files with dangerous extensions
+\end{itemize}
+
+\textbf{NFR3.2: AI Prompt Injection Prevention} \priority{HIGH}
+
+\begin{itemize}
+    \item Escape user code before sending to AI
+    \item Use system instructions to lock AI persona
+    \item Validate AI responses for unexpected content
+    \item Rate limiting on API calls (prevent abuse)
+\end{itemize}
+
+\subsection{5.4 Software Quality Attributes}
+
+\textbf{NFR4.1: Reliability} \priority{HIGH}
+
+\begin{itemize}
+    \item \textbf{MTBF (Mean Time Between Failures):} >100 hours of operation
+    \item \textbf{Test Coverage:} Minimum 95\% for core modules
+    \item \textbf{Error Rate:} <1\% false positives in syntax detection
+\end{itemize}
+
+\textbf{NFR4.2: Maintainability} \prioritymed{MEDIUM}
+
+\begin{itemize}
+    \item \textbf{Code Documentation:} Docstrings for all public functions
+    \item \textbf{Modularity:} Clear separation of Lexer, Parser, AI modules
+    \item \textbf{Naming Conventions:} PEP 8 compliance
+    \item \textbf{Cyclomatic Complexity:} <10 per function
+\end{itemize}
+
+\textbf{NFR4.3: Portability} \prioritymed{MEDIUM}
+
+\begin{itemize}
+    \item \textbf{Cross-Platform:} Windows, macOS, Linux support
+    \item \textbf{Python Versions:} Compatible with 3.10, 3.11, 3.12
+    \item \textbf{Virtual Environment:} Fully functional in \texttt{venv}
+    \item \textbf{No OS-Specific Code:} Use \texttt{os.path} instead of hardcoded paths
+\end{itemize}
+
+\textbf{NFR4.4: Usability} \prioritymed{MEDIUM}
+
+\begin{itemize}
+    \item \textbf{Learning Curve:} New users productive within 30 minutes
+    \item \textbf{Error Messages:} Clear, actionable guidance
+    \item \textbf{Documentation:} README with setup and usage examples
+    \item \textbf{Help System:} Built-in \texttt{--help} command
+\end{itemize}
+
+\textbf{NFR4.5: Scalability} \prioritylow{LOW}
+
+\begin{itemize}
+    \item Handle source files up to 1,000 lines
+    \item Support up to 100 function definitions per file
+    \item Maintain performance for nesting depth up to 10 levels
+\end{itemize}
+
+\textbf{NFR4.6: Testability} \priority{HIGH}
+
+\begin{itemize}
+    \item Unit tests for all modules using \texttt{pytest}
+    \item Integration tests for end-to-end compilation
+    \item Mock Gemini API for offline testing
+    \item Automated CI/CD pipeline (future)
+\end{itemize}
+
+\clearpage
+
+\section{System Constraints}
+
+\subsection{6.1 Regulatory Policies}
+
+\begin{itemize}
+    \item \textbf{Academic Integrity:} Code must be original (no copy from existing compilers)
+    \item \textbf{API Usage:} Comply with Google Gemini Terms of Service
+    \item \textbf{Open Source:} May be released under MIT License
+\end{itemize}
+
+\subsection{6.2 Hardware Limitations}
+
+\begin{itemize}
+    \item System designed for single-machine deployment (no distributed computing)
+    \item No GPU acceleration required
+    \item Standard consumer hardware sufficient
+\end{itemize}
+
+\subsection{6.3 Interfaces to Other Applications}
+
+\begin{itemize}
+    \item No integration with IDEs (VSCode, PyCharm) in initial version
+    \item Standalone application (not a library)
+    \item Future: Plugin architecture for extensibility
+\end{itemize}
+
+\subsection{6.4 Parallel Operations}
+
+\begin{itemize}
+    \item Single-threaded compilation pipeline
+    \item Sequential processing: Lexer → Parser → Semantic → AI
+    \item Async API calls may be considered for performance
+\end{itemize}
+
+\subsection{6.5 Audit Functions}
+
+\begin{itemize}
+    \item Logging of all compilation attempts (optional)
+    \item Anonymized telemetry for error patterns (future)
+    \item User can disable all logging via configuration
+\end{itemize}
+
+\subsection{6.6 Control Functions}
+
+\begin{itemize}
+    \item Configuration via \texttt{.env} file
+    \item CLI flags for verbose mode, debug mode
+    \item No runtime modification of grammar rules
+\end{itemize}
+
+\subsection{6.7 Higher-Order Language Requirements}
+
+\begin{itemize}
+    \item All code written in Python 3.10+
+    \item No C/C++ extensions
+    \item Pure Python implementation for portability
+\end{itemize}
+
+\subsection{6.8 Signal Handshake Protocols}
+
+\begin{itemize}
+    \item HTTP/HTTPS for API communication
+    \item No custom network protocols
+\end{itemize}
+
+\subsection{6.9 Reliability Requirements}
+
+\begin{itemize}
+    \item Graceful degradation if AI unavailable (show basic error messages)
+    \item Retry logic for transient API failures (max 3 retries)
+    \item System remains functional without internet (compilation only, no AI)
+\end{itemize}
+
+\subsection{6.10 Criticality of the Application}
+
+\begin{itemize}
+    \item \textbf{Criticality Level:} LOW (educational/research tool)
+    \item Not used in production environments
+    \item Incorrect compilations do not pose safety risks
+\end{itemize}
+
+\subsection{6.11 Safety and Security Considerations}
+
+\begin{itemize}
+    \item Code execution not supported (analysis only)
+    \item Sandbox not required (no runtime execution)
+    \item API keys protected from accidental exposure
+\end{itemize}
+
+\clearpage
+
+\section{Appendix A: Use Cases}
+
+\subsection{Use Case 1: Student Debugging Syntax Error}
+
+\textbf{Actor:} Computer Science Student
+
+\textbf{Precondition:} Student has written Mini-Python code with syntax error
+
+\textbf{Main Flow:}
+\begin{enumerate}
+    \item Student saves code to \texttt{factorial.py}
+    \item Student runs \texttt{python main.py compile factorial.py}
+    \item System detects missing colon after function definition
+    \item System sends error context to Gemini API
+    \item AI explains error and suggests fix
+    \item Student corrects code and recompiles
+    \item Compilation succeeds
+\end{enumerate}
+
+\textbf{Postcondition:} Student understands grammar rule and fixes error
+
+\subsection{Use Case 2: Educator Demonstrating Compiler Phases}
+
+\textbf{Actor:} University Professor
+
+\textbf{Precondition:} Professor wants to show compilation pipeline in class
+
+\textbf{Main Flow:}
+\begin{enumerate}
+    \item Professor opens Web UI in browser
+    \item Types sample code with intentional errors
+    \item Clicks "Compile" button
+    \item AST visualization shows partial tree before error
+    \item Error explanation displayed in chatbot panel
+    \item Professor demonstrates fix and recompiles
+    \item Complete AST displayed
+\end{enumerate}
+
+\textbf{Postcondition:} Students visualize compilation stages
+
+\subsection{Use Case 3: Security Researcher Finding Vulnerabilities}
+
+\textbf{Actor:} Security Analyst
+
+\textbf{Precondition:} Analyst testing security auditing feature
+
+\textbf{Main Flow:}
+\begin{enumerate}
+    \item Analyst writes code using \texttt{eval()}
+    \item Runs compiler with security mode enabled
+    \item System flags \texttt{eval()} as HIGH risk
+    \item AI suggests secure alternative (e.g., \texttt{ast.literal\_eval()})
+    \item Analyst reviews suggestion and refactors code
+\end{enumerate}
+
+\textbf{Postcondition:} Code hardened against injection attacks
+
+\section{Appendix B: Data Dictionary}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{|l|X|}
+\hline
+\rowcolor{blue!10}
+\textbf{Data Element} & \textbf{Description} \\
+\hline
+Token & Object with type, value, line, column attributes \\
+\hline
+TokenType & Enumeration of all possible token categories \\
+\hline
+AST Node & Abstract base class for syntax tree elements \\
+\hline
+Symbol Table & Dictionary mapping identifiers to type/scope info \\
+\hline
+Error Context & Structured data sent to AI (code, tokens, grammar) \\
+\hline
+AI Response & Natural language explanation + suggested fix \\
+\hline
+\end{tabularx}
+\caption{Key Data Elements}
+\end{table}
+
+\section{Appendix C: Change History}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{|l|l|X|}
+\hline
+\rowcolor{blue!10}
+\textbf{Version} & \textbf{Date} & \textbf{Changes} \\
+\hline
+1.0 & Jan 2026 & Initial SRS document created \\
+\hline
+\end{tabularx}
+\caption{Document Revision History}
+\end{table}
+
+\vspace{10mm}
+\noindent\textbf{Approval Signatures:} \\
+\vspace{5mm}
+
+\noindent\textbf{Project Lead:} \rule{5cm}{0.4pt} \hspace{1cm} \textbf{Date:} \rule{3cm}{0.4pt} \\
+\vspace{5mm}
+
+\noindent\textbf{Technical Reviewer:} \rule{5cm}{0.4pt} \hspace{1cm} \textbf{Date:} \rule{3cm}{0.4pt} \\
+
+\end{document}

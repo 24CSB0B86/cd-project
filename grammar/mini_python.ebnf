@@ -1,0 +1,39 @@
+# REFERENCE GRAMMAR FOR PROJECT 83 COMPILER
+# This file is used as the strict rule-set for AI Reasoning.
+# Any code not following these rules must be flagged as a SyntaxError.
+... (rest of the content remains the same)
+
+(* 
+   EBNF for Mini-Python Subset 
+   Used for Week 5-7 Implementation 
+*)
+
+program         = { statement } ;
+
+statement       = assignment | if_stmt | while_stmt | func_def | print_stmt ;
+
+assignment      = identifier , "=" , expression , NEWLINE ;
+
+if_stmt         = "if" , condition , ":" , block , [ "else" , ":" , block ] ;
+
+while_stmt      = "while" , condition , ":" , block ;
+
+func_def        = "def" , identifier , "(" , [ params ] , ")" , ":" , block ;
+
+print_stmt      = "print" , "(" , expression , ")" , NEWLINE ;
+
+block           = NEWLINE , INDENT , { statement } , DEDENT ;
+
+expression      = term , { ( "+" | "-" ) , term } ;
+
+term            = factor , { ( "*" | "/" ) , factor } ;
+
+factor          = identifier | number | "(" , expression , ")" ;
+
+condition       = expression , comp_op , expression ;
+
+comp_op         = "==" | "!=" | "<" | ">" | "<=" | ">=" ;
+
+identifier      = letter , { letter | digit | "_" } ;
+
+number          = digit , { digit } ;

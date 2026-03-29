@@ -1,0 +1,74 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{tcolorbox}
+
+\geometry{margin=1in}
+
+% Title formatting
+\titleformat{\section}{\large\bfseries\color{blue!70!black}}{\thesection}{1em}{}
+\titleformat{\subsection}{\bfseries}{\thesubsection}{1em}{}
+
+\begin{document}
+
+\begin{center}
+    \LARGE \textbf{Project Description \& Methodological Approach} \\
+    \vspace{2mm}
+    \large \textbf{Project 83: Conversational Agentic AI Compiler Assistant}
+\end{center}
+
+\section{Project Overview}
+Project 83 aims to revolutionize the traditional compiler workflow by transforming it from a static, diagnostic-only tool into a **Conversational Agentic Assistant**. 
+
+While a standard Python compiler (like CPython) provides error messages that are often cryptic to beginners or lack security context, this system integrates a custom-built compiler front-end with the reasoning capabilities of the \textbf{Google Gemini 2.5 Flash AI}.
+
+\subsection{Key Functionalities}
+\begin{itemize}
+    \item \textbf{Syntactic \& Lexical Assistance:} Real-time detection of errors in a Python subset (Mini-Python) using a manually implemented front-end.
+    \item \textbf{Conversational Debugging:} Instead of static tracebacks, the system uses an AI agent to explain errors through a dialogue interface.
+    \item \textbf{Agentic Self-Correction:} The AI agent can autonomously "probe" the compiler's Abstract Syntax Tree (AST) and Symbol Table to identify root causes and suggest secure fixes.
+    \item \textbf{Security Auditing:} Detection of insecure patterns (e.g., Command Injection or unsafe variable shadowing) at the compilation stage.
+\end{itemize}
+
+\section{The Methodological Approach}
+Our approach follows a three-layered architecture: the \textbf{Front-End Compiler Layer}, the \textbf{Agentic Orchestration Layer}, and the \textbf{Interactive User Interface}.
+
+\subsection{Layer 1: Deterministic Compiler Front-End (From Scratch)}
+To ensure academic rigor and deep system integration, the compiler is built without high-level generators like ANTLR or PLY. 
+\begin{enumerate}
+    \item \textbf{Lexical Analysis:} A regex-based tokenizer that converts raw code into tokens while maintaining Python-specific requirements like indentation tracking.
+    \item \textbf{Syntax Analysis:} A \textit{Recursive Descent Parser} that validates tokens against an EBNF grammar and constructs a JSON-serializable \textbf{Abstract Syntax Tree (AST)}.
+    \item \textbf{Semantic Analysis:} A Scope Manager and Symbol Table implementation to validate variable declarations and type consistency.
+\end{enumerate}
+
+\subsection{Layer 2: Agentic Orchestration (The Gemini "Brain")}
+Instead of static prompts, we utilize an **Agentic Workflow** using the Gemini API. 
+\begin{itemize}
+    \item \textbf{Contextual Injection:} The compiler’s internal state (AST, Symbols, Error Logs) is serialized and provided as "Active Context" to the LLM.
+    \item \textbf{Tool-Use (Function Calling):} We define specific functions that Gemini can execute, such as \texttt{get\_node\_info(line\_id)} or \texttt{analyze\_scope(variable\_name)}. This allows the AI to act as an agent that "investigates" the code.
+    \item \textbf{Reason + Act (ReAct) Strategy:} The agent is instructed to think (\textit{Reason}) about the compiler error before performing an action (\textit{Act}) or responding to the user.
+\end{itemize}
+
+\subsection{Layer 3: The Conversational Loop}
+The user interface is designed as a collaborative IDE. When a compilation error occurs:
+\begin{equation}
+    \text{Error} \rightarrow \text{Compiler Diagnostics} \rightarrow \text{Gemini Analysis} \rightarrow \text{Conversational Suggestion}
+\end{equation}
+The user can then ask follow-up questions (e.g., "Why is that a security risk?") or request the agent to auto-fix the code and re-compile.
+
+\section{Security Relevance}
+This approach directly addresses security at the "Shift-Left" stage. By utilizing the LLM's pattern recognition, the compiler can detect vulnerabilities that are syntactically correct but logically dangerous, such as:
+\begin{itemize}
+    \item \textbf{Insecure Defaults:} Detecting the use of weak encryption or insecure libraries.
+    \item \textbf{Injection Flaws:} Identifying untrusted inputs being passed to sensitive sinks (e.g., a print statement that could be exploited).
+\end{itemize}
+
+\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=Summary of Innovation]
+By replacing a standard "trained model" with the **Gemini API orchestrating a custom-built compiler**, the project provides a scalable, explainable, and highly intelligent developer tool that bridges the gap between formal language theory and modern Artificial Intelligence.
+\end{tcolorbox}
+
+\end{document}

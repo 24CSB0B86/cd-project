@@ -1,0 +1,403 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage[table]{xcolor}
+\usepackage{fancyhdr}
+\usepackage{tikz}
+\usepackage{tabularx}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{lastpage}
+\usepackage{hyperref}
+
+% Page Setup
+\geometry{top=1in, bottom=1in, left=0.8in, right=0.8in}
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small Project 83: Agentic AI Compiler Assistant}
+\rhead{\small Week 3 Report}
+\cfoot{\thepage\ of \pageref{LastPage}}
+
+% Formatting - FIXED: Added closing brace
+\titleformat{\section}{\Large\bfseries\color{blue!70!black}}{\thesection.}{1em}{}[\titlerule]
+\titleformat{\subsection}{\large\bfseries\color{blue!50!black}}{\thesubsection}{1em}{}
+
+% Code Listings Configuration
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    backgroundcolor=\color{gray!10},
+    keywordstyle=\color{blue},
+    stringstyle=\color{green!50!black},
+    commentstyle=\color{gray},
+    showstringspaces=false,
+    tabsize=4,
+    captionpos=b
+}
+
+% Custom commands
+\newcommand{\statusgood}[1]{\colorbox{green!20}{\textbf{#1}}}
+\newcommand{\statuspending}[1]{\colorbox{yellow!20}{\textbf{#1}}}
+\newcommand{\statusissue}[1]{\colorbox{red!20}{\textbf{#1}}}
+
+\begin{document}
+
+\begin{center}
+    {\huge \textbf{Week 3 Progress Report}} \\
+    \vspace{3mm}
+    {\large \textbf{Project 83: Conversational Agentic AI Compiler Assistant}} \\
+    \vspace{2mm}
+    \textit{Requirements \& Security Policy Analysis} \\
+    \vspace{2mm}
+    \textbf{Reporting Period:} Week 3 | \textbf{Status:} \statusgood{COMPLETED}
+\end{center}
+
+\vspace{5mm}
+
+\section{Executive Summary}
+
+Week 3 concentrated on formalizing the project's functional and non-functional requirements while establishing comprehensive security policies for code analysis. This phase was pivotal in translating the Week 1 scope definition and Week 2 AI capabilities into concrete, testable requirements. The deliverables include a Software Requirements Specification (SRS) document, a detailed threat model for AI-powered code analysis, and a security ruleset for detecting dangerous code patterns.
+
+\textbf{Key Achievement:} Successfully documented 15 functional requirements and 8 non-functional requirements with full traceability matrix. Established security policies aligned with OWASP Top 10 for LLM Applications, specifically targeting \texttt{eval()}, \texttt{exec()}, and infinite recursion detection. Created comprehensive threat model addressing prompt injection vulnerabilities.
+
+\subsection{Week Overview}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Planned Objectives:} Document requirements, define security policies, create SRS document
+    \item \textbf{Achieved Objectives:} Complete SRS specification, OWASP-aligned security ruleset, threat modeling analysis
+    \item \textbf{Completion Rate:} 100\%
+\end{itemize}
+
+\section{Detailed Activities \& Accomplishments}
+
+\subsection{3.1 Functional Requirements Analysis}
+
+\textbf{Objective:} Identify and formally document all functional capabilities the compiler assistant must provide.
+
+\textbf{Activities Performed:}
+\begin{itemize}[leftmargin=*]
+    \item Conducted stakeholder analysis to identify user personas (students, educators, developers)
+    \item Mapped user stories to technical requirements using use-case driven approach
+    \item Defined detailed acceptance criteria for each requirement
+    \item Created requirements traceability matrix linking requirements to implementation phases
+    \item Prioritized requirements using MoSCoW method (Must-have, Should-have, Could-have, Won't-have)
+\end{itemize}
+
+\textbf{Key Functional Requirements Identified:}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{FR-001: Lexical Analysis} - System must tokenize Mini-Python source code with 99\% accuracy
+    \item \textbf{FR-002: Syntax Parsing} - System must construct valid AST for syntactically correct code
+    \item \textbf{FR-003: Semantic Analysis} - System must detect undefined variables, type mismatches
+    \item \textbf{FR-004: Error Detection} - System must identify and categorize syntax, semantic, and security errors
+    \item \textbf{FR-005: Conversational Feedback} - AI must explain errors in natural language within 3 seconds
+    \item \textbf{FR-006: Fix Suggestions} - AI must provide code corrections with >85\% applicability
+    \item \textbf{FR-007: Security Auditing} - System must flag dangerous constructs (eval, exec, imports)
+    \item \textbf{FR-008: Indentation Handling} - Lexer must correctly emit INDENT/DEDENT tokens
+    \item \textbf{FR-009: Multi-turn Dialogue} - User should be able to ask follow-up questions about errors
+    \item \textbf{FR-010: Code Visualization} - System should generate AST visualizations for debugging
+\end{enumerate}
+
+\subsection{3.2 Non-Functional Requirements Specification}
+
+\textbf{Objective:} Define quality attributes and constraints for system performance and usability.
+
+\textbf{Non-Functional Requirements:}
+
+\begin{table}[h]
+\centering
+% FIXED: Added 3rd column definition
+\begin{tabularx}{\textwidth}{|l|X|l|}
+\hline
+\rowcolor{blue!10}
+\textbf{Category} & \textbf{Requirement} & \textbf{Target Metric} \\
+\hline
+Performance & NFR-001: Lexer Speed & Process 1000 lines/sec \\
+\hline
+Performance & NFR-002: AI Response Time & <3 seconds average \\
+\hline
+Usability & NFR-003: Error Clarity & 90\% user comprehension \\
+\hline
+Reliability & NFR-004: Uptime & 99.5\% availability \\
+\hline
+Security & NFR-005: API Security & Encrypted API comms \\
+\hline
+Scalability & NFR-006: Code Size & Handle 10,000 lines \\
+\hline
+Maintainability & NFR-007: Code Quality & >80\% test coverage \\
+\hline
+Compatibility & NFR-008: Python Version & Python 3.8+ syntax \\
+\hline
+\end{tabularx}
+\caption{Non-Functional Requirements}
+\end{table}
+
+\newpage
+
+\section{Security Policy \& Threat Modeling}
+
+\subsection{3.3 OWASP Top 10 for LLM Applications Analysis}
+
+\textbf{Objective:} Establish security policies aligned with industry best practices for AI-assisted code analysis.
+
+\textbf{Research Activities:}
+\begin{itemize}[leftmargin=*]
+    \item Studied OWASP Top 10 for Large Language Model Applications (2023)
+    \item Analyzed potential attack vectors specific to compiler-AI integration
+    \item Reviewed Python security best practices from PEP 8 security guidelines
+    \item Consulted academic research on adversarial attacks on code analysis tools
+\end{itemize}
+
+\textbf{Identified Security Risks:}
+
+\begin{enumerate}
+    \item \textbf{LLM01: Prompt Injection}
+    \begin{itemize}
+        \item \textit{Threat:} Malicious code comments manipulating AI responses
+        \item \textit{Mitigation:} Sanitize comments before AI processing; use structured JSON instead of free text
+    \end{itemize}
+    
+    \item \textbf{LLM02: Insecure Output Handling}
+    \begin{itemize}
+        \item \textit{Threat:} AI generates code with vulnerabilities
+        \item \textit{Mitigation:} Validate AI-suggested fixes through compiler re-run before presenting to user
+    \end{itemize}
+    
+    \item \textbf{LLM03: Training Data Poisoning} (Low risk - using pre-trained Gemini)
+    
+    \item \textbf{LLM06: Sensitive Information Disclosure}
+    \begin{itemize}
+        \item \textit{Threat:} User code containing secrets sent to Gemini API
+        \item \textit{Mitigation:} Add privacy notice; implement local secret detection before API submission
+    \end{itemize} % FIXED: Added closing itemize
+\end{enumerate}
+
+\subsection{3.4 Code Security Ruleset Definition}
+
+\textbf{Objective:} Define specific patterns the Security Auditing Agent must detect.
+
+\textbf{Dangerous Pattern Categories:}
+
+\begin{table}[h]
+\centering
+\begin{tabularx}{\textwidth}{|l|X|c|}
+\hline
+\rowcolor{blue!10}
+\textbf{Pattern} & \textbf{Security Risk} & \textbf{Severity} \\
+\hline
+\texttt{eval()} & Arbitrary code execution & \statusissue{CRITICAL} \\
+\hline
+\texttt{exec()} & Code injection vulnerability & \statusissue{CRITICAL} \\
+\hline
+\texttt{\_\_import\_\_()} & Dynamic imports bypass security & \statusissue{HIGH} \\
+\hline
+Infinite recursion & Denial of Service (resource exhaustion) & \statuspending{MEDIUM} \\
+\hline
+\texttt{open()} without context & Resource leaks & \statuspending{MEDIUM} \\
+\hline
+Hardcoded credentials & Information disclosure & \statusissue{HIGH} \\
+\hline
+\end{tabularx}
+\caption{Security Pattern Detection Ruleset}
+\end{table}
+
+\textbf{Implementation Approach:}
+\begin{itemize}[leftmargin=*]
+    \item Static pattern matching during AST traversal
+    \item Dedicated SecurityAuditorAgent with specialized prompts
+    \item Configurable severity thresholds for different deployment contexts
+\end{itemize}
+
+\section{Documentation Deliverables}
+
+\subsection{4.1 Software Requirements Specification (SRS) Document}
+
+\textbf{Structure Created:}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{docs/SRS.md} - Comprehensive requirements document including:
+    \begin{itemize}
+        \item Project scope and objectives
+        \item Functional requirements (FR-001 through FR-015)
+        \item Non-functional requirements (NFR-001 through NFR-008)
+        \item Use case diagrams and scenarios
+        \item Requirements traceability matrix
+        \item Acceptance test criteria
+    \end{itemize}
+    \item \texttt{docs/threat\_model.md} - Security analysis including:
+    \begin{itemize}
+        \item Threat landscape analysis
+        \item Attack tree diagrams
+        \item Mitigation strategies
+        \item Security testing plan
+    \end{itemize}
+\end{itemize}
+
+\subsection{4.2 Task Tracking System Setup}
+
+\textbf{Tool Selected:} Trello (chosen for visual Kanban board and ease of collaboration)
+
+\textbf{Board Structure:}
+\begin{itemize}[leftmargin=*]
+    \item Backlog
+    \item In Progress
+    \item Code Review
+    \item Testing
+    \item Completed
+\end{itemize}
+
+\textbf{Metrics Tracked:}
+\begin{itemize}[leftmargin=*]
+    \item Task completion velocity
+    \item Time spent per implementation phase
+    \item Bug discovery rate during testing
+\end{itemize}
+
+\section{Technical Challenges \& Solutions}
+
+\subsection{5.1 Challenge: Balancing Security Strictness vs. User Experience}
+
+\textbf{Problem:} Overly aggressive security warnings could frustrate users with false positives.
+
+\textbf{Solution Approach:}
+\begin{itemize}[leftmargin=*]
+    \item Implemented three-tier severity system: Critical (blocks compilation), High (strong warning), Medium (informational)
+    \item Designed AI to explain *why* a pattern is dangerous rather than just flagging it
+    \item Created user preference settings for security sensitivity levels
+\end{itemize}
+
+\textbf{Impact:} Requirements now include user-configurable security profiles for different use cases (education vs. production).
+
+\subsection{5.2 Challenge: Requirements Traceability at Scale}
+
+\textbf{Problem:} With 23 total requirements, maintaining traceability to implementation and test cases becomes complex.
+
+\textbf{Solution Approach:}
+\begin{itemize}[leftmargin=*]
+    \item Created spreadsheet-based traceability matrix
+    \item Established naming convention: FR-XXX for functional, NFR-XXX for non-functional, TC-XXX for test cases
+    \item Each requirement includes "Verification Method" field specifying how it will be tested
+\end{itemize}
+
+\section{Requirements Traceability Matrix}
+
+\begin{table}[h]
+\centering
+\begin{tabularx}{\textwidth}{|l|X|c|c|}
+\hline
+\rowcolor{blue!10}
+\textbf{Req ID} & \textbf{Description} & \textbf{Phase} & \textbf{Test ID} \\
+\hline
+FR-001 & Lexical Analysis & Week 5 & TC-101-105 \\
+\hline
+FR-002 & Syntax Parsing & Week 6 & TC-201-210 \\
+\hline
+FR-003 & Semantic Analysis & Week 7 & TC-301-308 \\
+\hline
+FR-004 & Error Detection & Week 7 & TC-401-415 \\
+\hline
+FR-005 & Conversational Feedback & Week 10 & TC-501-520 \\
+\hline
+FR-006 & Fix Suggestions & Week 10 & TC-601-612 \\
+\hline
+FR-007 & Security Auditing & Week 11 & TC-701-710 \\
+\hline
+NFR-001 & Performance (Lexer) & Week 12 & TC-801 \\
+\hline
+NFR-002 & AI Response Time & Week 12 & TC-802 \\
+\hline
+\end{tabularx}
+\caption{Requirements to Implementation Traceability}
+\end{table}
+
+\section{Metrics \& Progress Indicators}
+
+\begin{table}[h]
+\centering
+\begin{tabularx}{\textwidth}{|l|c|X|}
+\hline
+\rowcolor{blue!10}
+\textbf{Metric} & \textbf{Target} & \textbf{Actual} \\
+\hline
+Requirements Documented & 20+ & 23 (15 FR + 8 NFR) \\
+\hline
+Security Policies Defined & Complete & Complete - 6 critical patterns \\
+\hline
+SRS Document Quality & High & High - Peer reviewed \\
+\hline
+Threat Model Completeness & Thorough & Thorough - OWASP aligned \\
+\hline
+Stakeholder Approval & Yes & Yes - Requirements validated \\
+\hline
+Schedule Adherence & On Track & On Track - Week 3 scope met \\
+\hline
+\end{tabularx}
+\caption{Week 3 Performance Metrics}
+\end{table}
+
+\section{Risk Assessment}
+
+\subsection{Identified Risks}
+
+\begin{enumerate}
+    \item \textbf{Requirement Creep (Medium):} Stakeholders may request additional features
+    \begin{itemize}
+        \item \textit{Mitigation:} Formal change control process; prioritize using MoSCoW
+    \end{itemize}
+    
+    \item \textbf{Security vs. Performance Trade-off (Low):} Deep security scans may slow compilation
+    \begin{itemize}
+        \item \textit{Mitigation:} Asynchronous security analysis; caching of analysis results
+    \end{itemize}
+    
+    \item \textbf{AI Reliability for Security (Medium):} Gemini may miss subtle vulnerabilities
+    \begin{itemize}
+        \item \textit{Mitigation:} Hybrid approach - static rules + AI analysis for comprehensive coverage
+    \end{itemize}
+\end{enumerate}
+
+\section{Lessons Learned}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Early Security Focus:} Integrating security analysis in requirements phase prevents costly retrofitting
+    \item \textbf{Traceability Value:} Explicit requirement-to-test mapping improves validation confidence
+    \item \textbf{OWASP Relevance:} LLM-specific security considerations are critical for AI-integrated systems
+    \item \textbf{User-Centric Security:} Security policies must balance protection with educational value
+\end{itemize}
+
+\section{Next Week Preview (Week 4)}
+
+\textbf{Focus:} System Architecture \& Orchestration Planning
+
+\textbf{Planned Activities:}
+\begin{itemize}[leftmargin=*]
+    \item Design overall system architecture with UML component diagrams
+    \item Define Compiler-Agent Bridge interface specification
+    \item Specify JSON schema for AST serialization
+    \item Design orchestration workflow for error-driven AI invocation
+    \item Create sequence diagrams for multi-agent interaction
+    \item Define class structures for Lexer, Parser, Semantic Analyzer
+\end{itemize}
+
+\textbf{Success Criteria:}
+\begin{itemize}[leftmargin=*]
+    \item Complete architecture diagram approved
+    \item Interface contracts defined between compiler and AI components
+    \item Clear implementation roadmap for Phase 3 (Front-End Development)
+\end{itemize}
+
+\section{Conclusion}
+
+Week 3 successfully formalized the project requirements and established a comprehensive security framework for the Agentic AI Compiler Assistant. The SRS document provides clear, testable specifications that will guide all subsequent implementation work. The security policies, aligned with OWASP best practices, ensure the system will safely analyze user code while protecting against adversarial attacks.
+
+The requirements traceability matrix creates accountability and ensures no critical functionality is overlooked during implementation. The project continues to maintain its schedule with Week 3 deliverables completed on time and stakeholder approval obtained for proceeding to architecture design in Week 4.
+
+\vspace{5mm}
+\noindent\textbf{Prepared by:} Project Team \\
+\textbf{Reporting Date:} Week 3 Completion \\
+\textbf{Next Review:} Week 4 Report
+
+\end{document}

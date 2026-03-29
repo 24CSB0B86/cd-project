@@ -1,0 +1,193 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+
+% Page Setup
+\geometry{top=1in, bottom=1in, left=0.8in, right=0.8in}
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small Project 83: Agentic AI Compiler Assistant}
+\rhead{\small Execution Plan 2026}
+\cfoot{\thepage}
+
+% Formatting
+\titleformat{\section}{\large\bfseries\color{blue!70!black}}{Phase \thesection:}{1em}{}[\titlerule]
+\titleformat{\subsection}{\bfseries}{Week \thesubsection:}{1em}{}
+\newcommand{\weekdetail}[3]{
+    \textbf{Tasks:} #1 \\
+    \textbf{Tools:} #2 \\
+    \textbf{Resources/Methods:} #3 \\
+}
+
+\begin{document}
+
+\begin{center}
+    {\huge \textbf{Detailed Execution Plan and Report}} \\
+    \vspace{2mm}
+    {\large \textbf{Project 83: Conversational Agentic AI Compiler Assistant}} \\
+    \vspace{2mm}
+    \textit{Target Language: Python (Subset) | Intelligence: Google Gemini Pro API}
+\end{center}
+
+\section{Problem Understanding \& Basic Foundations}
+
+\subsection{1 -- Problem Definition \& Scope Research}
+\weekdetail{
+    Define the EBNF (Extended Backus-Naur Form) grammar for a Python subset (Mini-Python) including variables, loops, and functions. Map the "Agentic" interaction flow.
+}{
+    LucidChart (Grammar Mapping), Markdown (Documentation).
+}{
+    Python Language Reference (Grammar Specification), Research on "ReAct" (Reason + Act) agent patterns.
+}
+
+\subsection{2 -- Gemini API \& Agentic Workflow Design}
+\weekdetail{
+    Set up Google AI Studio environment. Test Gemini's capability to interpret raw Python tokens and AST structures. Design the prompt architecture for the "Auditor" and "Assistant" agents.
+}{
+    Google Generative AI SDK, Python `python-dotenv`.
+}{
+    Gemini API Documentation, Prompt Engineering Guide for Developers (DeepLearning.AI).
+}
+
+\section{Requirement Analysis \& System Design}
+
+\subsection{3 -- Requirements \& Security Policy Analysis}
+\weekdetail{
+    Identify functional requirements (error detection, code fix suggestions) and security policies (detecting `eval()`, insecure imports, or infinite recursion).
+}{
+    Jira/Trello (Task Tracking), LaTeX (SRS Document).
+}{
+    OWASP Top 10 for LLM Applications, Python Security Best Practices.
+}
+
+\subsection{4 -- System Architecture \& Orchestration Planning}
+\weekdetail{
+    Design the "Compiler-Agent Bridge." Define how the compiler state (AST) is converted to JSON for Gemini and how Gemini's responses trigger compiler re-runs.
+}{
+    Draw.io (Architecture Diagrams), Mermaid.js.
+}{
+    "Building LLM-Powered Agents" (NVIDIA Technical Blog).
+}
+
+\section{Compiler Front-End Implementation (From Scratch)}
+
+\subsection{5 -- Lexer (Lexical Analyzer) Development}
+\weekdetail{
+    Build a Regex-based Lexer from scratch. Convert source code into a stream of tokens (Keywords, Identifiers, Literals, Operators). Handle indentation tracking (unique to Python).
+}{
+    Python `re` module, `enum` for Token Types.
+}{
+    "Compilers: Principles, Techniques, and Tools" (Dragon Book - Chapter 3).
+}
+
+\subsection{6 -- Syntax Parser (Recursive Descent)}
+\weekdetail{
+    Implement a Top-Down Recursive Descent Parser. Construct an Abstract Syntax Tree (AST) from the token stream. Handle operator precedence and nested blocks.
+}{
+    Python classes (Node objects), `json` (for tree serialization).
+}{
+    "Crafting Interpreters" by Robert Nystrom (Parsing section).
+}
+
+\subsection{7 -- Semantic Analyzer \& Basic Diagnostics}
+\weekdetail{
+    Implement a Symbol Table to track variable scope and type checking. Build a diagnostic engine that logs errors with line and column numbers.
+}{
+    Python Dictionary-based Symbol Tables.
+}{
+    Modern Compiler Implementation in ML (Appel).
+}
+
+\section{AI Integration \& Agentic Logic}
+
+\subsection{8 -- Gemini API Integration \& Context Injection}
+\weekdetail{
+    Develop the "Context Provider" that formats the AST and Symbol Table into a natural language description for Gemini. Implement secure API call handling.
+}{
+    Gemini-1.5-Pro API, `google-generativeai` library.
+}{
+    JSON-to-Text serialization techniques for LLMs.
+}
+
+\subsection{9 -- Agentic Tool-Use (Function Calling)}
+\weekdetail{
+    Enable Gemini to "call" compiler functions (e.g., `check_scope()`, `reparse_code()`) to investigate errors autonomously before responding to the user.
+}{
+    Gemini Function Calling API.
+}{
+    "Model-controlled tool use" (Google AI Documentation).
+}
+
+\subsection{10 -- Conversational Debugging Interface}
+\weekdetail{
+    Develop the Chatbot UI/CLI where the user submits code. The AI should explain errors "step-by-step" rather than just outputting a traceback.
+}{
+    Streamlit (Web UI) or Rich (CLI).
+}{
+    Human-Computer Interaction (HCI) principles for AI assistants.
+}
+
+\section{Security, Optimization \& Testing}
+
+\subsection{11 -- Security Risk Auditing Agent}
+\weekdetail{
+    Program a specific Agent role to audit code for "Logic Bombs" or "Prompt Injection" within the code comments. Ensure the compiler rejects unsafe constructs.
+}{
+    Static Analysis Security Testing (SAST) logic.
+}{
+    Snyk Python Security scan reports.
+}
+
+\subsection{12 -- Performance Benchmarking}
+\weekdetail{
+    Measure the latency of AI responses. Compare the accuracy of Gemini's suggested fixes against traditional Python `SyntaxError` messages.
+}{
+    Python `timeit` module, `PyTest` for automated testing.
+}{
+    Standard Python error test suites.
+}
+
+\section{Refinement \& Presentation}
+
+\subsection{13 -- Explainability \& Traceability (XAI)}
+\weekdetail{
+    Implement a "Reasoning Log" where the agent shows which part of the AST led to its decision. This fulfills the Explainability requirement of the project.
+}{
+    Graphviz (AST visualization).
+}{
+    Explainable AI (XAI) framework standards.
+}
+
+\subsection{14 -- Integration & Bug Squashing}
+\weekdetail{
+    Perform end-to-end testing. Ensure that code fixed by the AI actually passes the "from scratch" parser without errors.
+}{
+    GitHub Actions (CI/CD).
+}{
+    Regression testing methodologies.
+}
+
+\subsection{15 -- Documentation \& Report Finalization}
+\weekdetail{
+    Complete the final report including architecture diagrams, prompt templates, and code snippets. Prepare presentation slides.
+}{
+    Overleaf (LaTeX), Google Slides.
+}{
+    Academic Report Writing standards.
+}
+
+\subsection{16 -- Live Demonstration \& Submission}
+\weekdetail{
+    Conduct a live demo of the Conversational Agentic Assistant. Submit the final source code repository and documentation.
+}{
+    Loom (Demo Recording), GitHub (Code Repository).
+}{
+    Project Rubric and Assessment Criteria.
+}
+
+\end{document}

@@ -1,0 +1,304 @@
+    \documentclass[a4paper,11pt]{article}
+    \usepackage[utf8]{inputenc}
+    \usepackage[T1]{fontenc}
+    \usepackage{geometry}
+    \usepackage{enumitem}
+    \usepackage{titlesec}
+    \usepackage[table]{xcolor}
+    \usepackage{fancyhdr}
+    \usepackage{tikz}
+    \usepackage{tabularx}
+    \usepackage{listings}
+    \usepackage{graphicx}
+    \usepackage{lastpage}
+    \usepackage{hyperref}
+
+    % Page Setup
+    \geometry{top=1in, bottom=1in, left=0.8in, right=0.8in}
+    \pagestyle{fancy}
+    \fancyhf{}
+    \lhead{\small Project 83: Agentic AI Compiler Assistant}
+    \rhead{\small Week 8 Report}
+    \cfoot{\thepage\ of \pageref{LastPage}}
+
+    % Formatting
+    \titleformat{\section}{\Large\bfseries\color{blue!70!black}}{\thesection.}{1em}{}[\titlerule]
+    \titleformat{\subsection}{\large\bfseries\color{blue!50!black}}{\thesubsection}{1em}{}
+
+    % Code Listings Configuration
+    \lstset{
+        basicstyle=\ttfamily\small,
+        breaklines=true,
+        frame=single,
+        backgroundcolor=\color{gray!10},
+        keywordstyle=\color{blue},
+        stringstyle=\color{green!50!black},
+        commentstyle=\color{gray},
+        showstringspaces=false,
+        tabsize=4,
+        captionpos=b
+    }
+
+    % Custom commands
+    \newcommand{\statusgood}[1]{\colorbox{green!20}{\textbf{#1}}}
+    \newcommand{\statuspending}[1]{\colorbox{yellow!20}{\textbf{#1}}}
+
+    \begin{document}
+
+    \begin{center}
+        {\huge \textbf{Week 8 Progress Report}} \\
+        \vspace{3mm}
+        {\large \textbf{Project 83: Conversational Agentic AI Compiler Assistant}} \\
+        \vspace{2mm}
+        \textit{Gemini API Integration \& Context Injection} \\
+        \vspace{2mm}
+        \textbf{Reporting Period:} Week 8 | \textbf{Status:} \statusgood{COMPLETED}
+    \end{center}
+
+    \vspace{5mm}
+
+    \section{Executive Summary}
+
+    Week 8 focused on building the \textbf{Compiler--to--AI Bridge}: a \textbf{Context Provider} module that serializes the compiler's internal state (AST, Symbol Table, Semantic Errors) into structured natural language that the Gemini AI agent can reason about. The existing \texttt{gemini\_client.py} was also enhanced with a system prompt, context-aware analysis methods, and secure API error handling.
+
+    \textbf{Key Achievement:} The Context Provider transforms complex compiler data structures into readable text, allowing Gemini to understand \textit{what} the program does, \textit{what} variables exist, and \textit{what} errors were found --- enabling intelligent, grammar-grounded error explanations.
+
+    \subsection{Week Overview}
+    \begin{itemize}[leftmargin=*]
+        \item \textbf{Planned Objectives:} Context Provider for AST/Symbol Table serialization, enhanced Gemini client, secure API handling
+        \item \textbf{Achieved:} All planned objectives completed
+        \item \textbf{Test Coverage:} 27 new deterministic tests, 128 total tests passing (Weeks 5--8)
+    \end{itemize}
+
+    \section{Architecture: The Compiler--AI Bridge}
+
+    \subsection{2.1 Why Context Injection?}
+
+    A standard LLM prompt with just source code and an error message provides limited context. By serializing the compiler's \textit{internal state}, we give Gemini access to:
+
+    \begin{enumerate}
+        \item \textbf{Program Structure} --- what functions exist, what statements they contain, their line numbers
+        \item \textbf{Variable Information} --- every variable's type, scope, and definition location
+        \item \textbf{Precise Diagnostics} --- exact error locations with semantic context
+    \end{enumerate}
+
+    This enables Gemini to reason about errors at a much deeper level than a raw error message alone.
+
+    \subsection{2.2 Pipeline Integration}
+
+    \begin{table}[h]
+    \centering
+    \begin{tabularx}{\textwidth}{|c|l|X|}
+    \hline
+    \rowcolor{blue!10}
+    \textbf{Phase} & \textbf{Component} & \textbf{Output} \\
+    \hline
+    Week 5 & Lexer & Token stream \\
+    \hline
+    Week 6 & Parser & Abstract Syntax Tree (AST) \\
+    \hline
+    Week 7 & Semantic Analyzer & Validated AST + Symbol Table + Errors \\
+    \hline
+    \textbf{Week 8} & \textbf{Context Provider} & \textbf{Natural Language Context for Gemini} \\
+    \hline
+    \textbf{Week 8} & \textbf{Gemini Client (Enhanced)} & \textbf{AI-powered error explanation \& suggestions} \\
+    \hline
+    \end{tabularx}
+    \caption{Compiler pipeline --- Week 8 additions highlighted}
+    \end{table}
+
+    \section{Context Provider Implementation}
+
+    \subsection{3.1 Module: \texttt{src/orchestrator/context\_provider.py}}
+
+    \begin{lstlisting}[language=Python, caption=ContextProvider Class Overview]
+class ContextProvider:
+    @staticmethod
+    def serialize_ast(ast: Program) -> str:
+        """AST -> natural language summary"""
+
+    @staticmethod
+    def serialize_symbol_table(symbol_table: SymbolTable) -> str:
+        """Scope stack + symbols -> readable text"""
+
+    @staticmethod
+    def serialize_errors(errors, warnings) -> str:
+        """Semantic errors/warnings -> formatted text"""
+
+    @staticmethod
+    def build_context(source_code, ast, analyzer) -> str:
+        """Full pipeline context builder (main entry point)"""
+
+    @staticmethod
+    def build_error_context(source_code, error_type, ...) -> str:
+        """Pre-AST error context (for lexer/parser errors)"""
+    \end{lstlisting}
+
+    \subsection{3.2 AST Serialization}
+
+    The AST serializer walks the tree and produces a structured summary:
+
+    \begin{lstlisting}[language=Python, caption=AST Serialization Example Input]
+def factorial(n):
+    if n == 0:
+        return 1
+    return n * factorial(n - 1)
+result = factorial(5)
+    \end{lstlisting}
+
+    \textbf{Output:}
+    \begin{verbatim}
+PROGRAM STRUCTURE:
+  Functions defined: 1
+    - factorial(n) [line 1, 2 statements]
+      - If statement: condition (n == 0), without else [line 2]
+      - Return: n * factorial(n - 1) [line 4]
+  Global statements: 1
+    - Assignment: result = factorial(5) [line 5]
+    \end{verbatim}
+
+    \subsection{3.3 Symbol Table Serialization}
+
+    \begin{verbatim}
+SYMBOL TABLE:
+  Scope: global (level 1)
+    - factorial: type=function, defined at line 1, col 1
+    - result: type=unknown, defined at line 5, col 1
+    \end{verbatim}
+
+    \subsection{3.4 Error Serialization}
+
+    For code with semantic errors (e.g., \texttt{y = x + undefined\_var}):
+
+    \begin{verbatim}
+DIAGNOSTICS:
+  Errors (1):
+    - Line 2, Col 9: Undefined variable 'undefined_var'
+    \end{verbatim}
+
+    \subsection{3.5 Full Context Builder}
+
+    The \texttt{build\_context()} method combines all four sections (source code, AST, symbol table, diagnostics) into a single string that is injected into the Gemini prompt. This gives the AI agent a complete view of the program's state.
+
+    \section{Enhanced Gemini Client}
+
+    \subsection{4.1 System Prompt Injection}
+
+    The Gemini model is initialized with a persistent system prompt containing:
+    \begin{itemize}
+        \item The agent's role as a Mini-Python compiler expert
+        \item The complete EBNF grammar for reference
+        \item Instructions for the ReAct (Reason + Act) pattern
+        \item Security auditing rules
+    \end{itemize}
+
+    \begin{lstlisting}[language=Python, caption=System Prompt Injection]
+self.model = genai.GenerativeModel(
+    model_name=target_model,
+    system_instruction=SYSTEM_PROMPT,  # EBNF + rules
+)
+    \end{lstlisting}
+
+    \subsection{4.2 Context-Aware Methods}
+
+    \begin{lstlisting}[language=Python, caption=New API Methods]
+class GeminiCompilerAgent:
+    def analyze_with_context(self, compiler_context: str) -> str:
+        """Send full compiler state to Gemini for analysis"""
+
+    def explain_error(self, source_code, error_type,
+                      error_message, compiler_context=None) -> str:
+        """Ask Gemini to explain a specific error"""
+
+    def get_assistance(self, ...):
+        """Legacy method (backward compatible)"""
+    \end{lstlisting}
+
+    \subsection{4.3 Secure API Handling}
+
+    All API calls are wrapped in \texttt{\_safe\_send()} which handles:
+    \begin{itemize}
+        \item \textbf{Rate Limiting} (HTTP 429) --- returns a user-friendly retry message
+        \item \textbf{Timeout} --- returns a timeout notification
+        \item \textbf{Safety Filters} --- catches blocked prompt exceptions
+        \item \textbf{General Errors} --- logs and returns descriptive error messages
+        \item \textbf{Logging} --- uses Python's \texttt{logging} module instead of print statements
+    \end{itemize}
+
+    \section{Testing \& Validation}
+
+    \subsection{5.1 Test Suite Summary}
+
+    \begin{table}[h]
+    \centering
+    \begin{tabularx}{\textwidth}{|l|c|X|}
+    \hline
+    \rowcolor{blue!10}
+    \textbf{Test Class} & \textbf{Tests} & \textbf{Focus Area} \\
+    \hline
+    TestSerializeAST & 9 & Empty, assignment, function, if, while, print, call, multiple funcs, unary \\
+    \hline
+    TestSerializeSymbolTable & 4 & Global var, function, scope names, multiple vars \\
+    \hline
+    TestSerializeErrors & 3 & No errors, undefined var, multiple errors \\
+    \hline
+    TestBuildContext & 5 & All sections present, valid/error diagnostics, source included, complex program \\
+    \hline
+    TestBuildErrorContext & 4 & Lexer error, parser error, no line number, AST note \\
+    \hline
+    TestContextIntegration & 2 & Full pipeline valid code, pipeline with errors \\
+    \hline
+    \textbf{Total (Week 8)} & \textbf{27} & \textbf{All passing, fully deterministic} \\
+    \hline
+    \textbf{Grand Total} & \textbf{128} & \textbf{Weeks 5--8, all passing} \\
+    \hline
+    \end{tabularx}
+    \caption{Week 8 Test Suite --- all tests are deterministic (no API calls)}
+    \end{table}
+
+    \section{Deliverables}
+
+    \begin{itemize}[leftmargin=*]
+        \item \statusgood{COMPLETE} \texttt{src/orchestrator/context\_provider.py} --- Context serialization module
+        \item \statusgood{COMPLETE} \texttt{src/orchestrator/gemini\_client.py} --- Enhanced with system prompt, context-aware methods, secure handling
+        \item \statusgood{COMPLETE} \texttt{tests/test\_week8\_context.py} --- 27 deterministic tests
+        \item \statusgood{COMPLETE} \texttt{demo\_week8\_ai.py} --- 7 demonstrations (6 offline + 1 optional API call)
+    \end{itemize}
+
+    \section{Challenges \& Solutions}
+
+    \subsection{7.1 AST-to-Text Fidelity}
+    \textbf{Problem:} Converting a recursive tree structure into concise, readable text without losing important details.
+
+    \textbf{Solution:} Hierarchical indentation with per-node-type description methods. Functions are listed with their parameters, body statement count, and individual statement summaries.
+
+    \subsection{7.2 Deterministic Testing}
+    \textbf{Problem:} Testing AI integration typically requires API calls, making tests slow and non-deterministic.
+
+    \textbf{Solution:} The Context Provider is fully testable without any API calls. We verify the serialization output contains expected keywords and structure, ensuring the bridge layer works correctly regardless of Gemini availability.
+
+    \subsection{7.3 Backward Compatibility}
+    \textbf{Problem:} The existing \texttt{get\_assistance()} method was already used in Week 2 demos.
+
+    \textbf{Solution:} Kept the legacy method unchanged while adding new context-aware methods alongside it.
+
+    \section{Next Week Preview}
+
+    \textbf{Week 9: Agentic Tool-Use (Function Calling)}
+
+    \begin{itemize}[leftmargin=*]
+        \item Enable Gemini to ``call'' compiler functions (e.g., \texttt{check\_scope()}, \texttt{reparse\_code()})
+        \item Implement Gemini Function Calling API
+        \item Allow the AI to autonomously investigate errors before responding
+    \end{itemize}
+
+    \section{Conclusion}
+
+    Week 8 successfully built the \textbf{Compiler--to--AI Bridge}, implementing the Context Provider that serializes the AST, Symbol Table, and diagnostic errors into natural language context. The enhanced Gemini client now receives deep compiler state with every query, enabling grammar-grounded error explanations. All 128 tests pass, and the implementation is fully backward-compatible with the existing pipeline.
+
+    \vspace{5mm}
+    \noindent\textbf{Prepared by:} Project Team \\
+    \textbf{Reporting Date:} Week 8 Completion (24 February 2026) \\
+    \textbf{Next Review:} Week 9 Report
+
+    \end{document}
